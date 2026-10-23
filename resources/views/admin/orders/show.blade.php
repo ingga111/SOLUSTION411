@@ -18,20 +18,29 @@
             <div class="flex items-center gap-3">
                 <h1 class="text-2xl sm:text-3xl font-extrabold text-white">Detail Pesanan #{{ $order->order_number }}</h1>
                 @if($order->status->value === 'processing' && $order->payment?->payment_proof && $order->payment?->status?->value !== 'paid')
-                    <span class="px-3 py-1 rounded-full text-xs font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 animate-pulse">
-                        Perlu Verifikasi Bukti
+                    <span class="inline-flex items-center gap-1.5 whitespace-nowrap px-3.5 py-1.5 rounded-full text-xs font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-sm animate-pulse">
+                        <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
+                        <span>Perlu Verifikasi Bukti</span>
                     </span>
                 @elseif($order->status->value === 'completed')
-                    <span class="px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-                        ✓ Lunas & Selesai
+                    <span class="inline-flex items-center gap-1.5 whitespace-nowrap px-3.5 py-1.5 rounded-full text-xs font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-sm">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                        <span>✓ Lunas &amp; Selesai</span>
+                    </span>
+                @elseif($order->status->value === 'processing')
+                    <span class="inline-flex items-center gap-1.5 whitespace-nowrap px-3.5 py-1.5 rounded-full text-xs font-bold bg-blue-500/20 text-blue-300 border border-blue-500/40 shadow-sm">
+                        <span class="w-2 h-2 rounded-full bg-blue-400"></span>
+                        <span>Sedang Diproses</span>
                     </span>
                 @elseif($order->status->value === 'pending')
-                    <span class="px-3 py-1 rounded-full text-xs font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30">
-                        Menunggu Pembayaran
+                    <span class="inline-flex items-center gap-1.5 whitespace-nowrap px-3.5 py-1.5 rounded-full text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-sm">
+                        <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+                        <span>Menunggu Pembayaran</span>
                     </span>
                 @else
-                    <span class="px-3 py-1 rounded-full text-xs font-bold bg-rose-500/20 text-rose-400 border border-rose-500/30">
-                        {{ ucfirst($order->status->value) }}
+                    <span class="inline-flex items-center gap-1.5 whitespace-nowrap px-3.5 py-1.5 rounded-full text-xs font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40 shadow-sm">
+                        <span class="w-2 h-2 rounded-full bg-rose-400"></span>
+                        <span>Ditolak / Batal</span>
                     </span>
                 @endif
             </div>
@@ -153,54 +162,70 @@
                 }
 
                 $firstItem = $order->items->first();
-                $productLabel = $firstItem ? ($firstItem->product_name . ' - ' . $firstItem->variant_name) : 'Pesanan Akun';
+                $productLabel = $firstItem ? ($firstItem->product_name . ' - ' . $firstItem->variant_name) : 'Pesanan';
 
-                $waMessage = "Halo kak {$order->customer_name}! 👋\n"
-                    . "Terima kasih telah order di solustion411.\n\n"
-                    . "Pesanan Anda telah kami konfirmasi:\n"
-                    . "• Invoice: #{$order->order_number}\n"
-                    . "• Produk: {$productLabel}\n"
-                    . "• Qty: " . ($firstItem?->quantity ?? 1) . "\n\n"
-                    . "Berikut detail akun Anda:\n"
-                    . "📧 Email / Username: \n"
-                    . "🔑 Password: \n"
-                    . "📌 PIN Profil / Catatan: \n\n"
-                    . "Silakan langsung dicoba login ya kak. Jika ada kendala segera kabari kami. Terima kasih banyak! 🙏";
+                if ($order->isPreorder()) {
+                    $waMessage = "Halo kak {$order->customer_name}! 👋\n"
+                        . "Terima kasih telah melakukan Preorder di solustion411.\n\n"
+                        . "Pesanan Anda telah kami konfirmasi:\n"
+                        . "• Invoice: #{$order->order_number}\n"
+                        . "• Produk: {$productLabel}\n"
+                        . "• Ukuran Baju: " . ($order->clothing_size ?? $order->target_user_id) . "\n"
+                        . "• Pilihan Lengan: " . ($order->sleeve_type ?? $order->target_zone_id) . "\n"
+                        . "• Bordir Dada / NIM: " . ($order->embroidery_name ?: ($order->target_nickname ?: '-')) . "\n"
+                        . ($order->notes ? "• Catatan: {$order->notes}\n" : "")
+                        . "• Status Tagihan: " . ($order->isPaid() ? "LUNAS ✓" : "Menunggu Verifikasi Pembayaran") . "\n\n"
+                        . "Spesifikasi baju sudah kami catat ke daftar antrean produksi konveksi. Kami akan mengabari progres dan jadwal pengambilan pakaian melalui nomor WhatsApp ini ya kak. Terima kasih banyak! 🙏";
+                } else {
+                    $waMessage = "Halo kak {$order->customer_name}! 👋\n"
+                        . "Terima kasih telah order di solustion411.\n\n"
+                        . "Pesanan Anda telah kami konfirmasi:\n"
+                        . "• Invoice: #{$order->order_number}\n"
+                        . "• Produk: {$productLabel}\n"
+                        . "• Qty: " . ($firstItem?->quantity ?? 1) . "\n\n"
+                        . "Berikut detail akun Anda:\n"
+                        . "📧 Email / Username: \n"
+                        . "🔑 Password: \n"
+                        . "📌 PIN Profil / Catatan: \n\n"
+                        . "Silakan langsung dicoba login ya kak. Jika ada kendala segera kabari kami. Terima kasih banyak! 🙏";
+                }
 
                 $waLink = "https://wa.me/{$cleanPhone}?text=" . urlencode($waMessage);
             @endphp
 
-            <!-- WHATSAPP DELIVERY HELPER FOR ADMIN -->
-            <div class="glass-card rounded-3xl p-6 border border-emerald-500/30 bg-emerald-950/20 glow-effect space-y-4">
+            <!-- WHATSAPP DELIVERY & CONFIRMATION HELPER FOR ADMIN -->
+            <div class="glass-card rounded-3xl p-6 border {{ $order->isPreorder() ? 'border-fuchsia-500/30 bg-fuchsia-950/20' : 'border-emerald-500/30 bg-emerald-950/20' }} glow-effect space-y-4">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-2">
-                        <span class="text-2xl">📱</span>
-                        <h3 class="text-sm font-bold text-white uppercase tracking-wider">Kirim Akun via WhatsApp</h3>
+                        <span class="text-2xl">{{ $order->isPreorder() ? '👕' : '📱' }}</span>
+                        <h3 class="text-sm font-bold text-white uppercase tracking-wider">
+                            {{ $order->isPreorder() ? 'Konfirmasi Preorder via WhatsApp' : 'Kirim Akun via WhatsApp' }}
+                        </h3>
                     </div>
-                    <span class="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-                        Admin WA
+                    <span class="text-[10px] font-bold px-2.5 py-0.5 rounded-full {{ $order->isPreorder() ? 'bg-fuchsia-500/20 text-fuchsia-400 border border-fuchsia-500/30' : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' }}">
+                        {{ $order->isPreorder() ? 'Konveksi WA' : 'Admin WA' }}
                     </span>
                 </div>
 
                 <p class="text-xs text-gray-300 leading-relaxed">
-                    Pengiriman akun dilakukan oleh Admin via WhatsApp ke nomor customer:
-                    <strong class="text-emerald-400 font-mono">{{ $order->customer_phone }}</strong>.
+                    {{ $order->isPreorder() ? 'Konfirmasi pesanan preorder & jadwal produksi ke customer via WhatsApp:' : 'Pengiriman akun dilakukan oleh Admin via WhatsApp ke nomor customer:' }}
+                    <strong class="{{ $order->isPreorder() ? 'text-fuchsia-400' : 'text-emerald-400' }} font-mono">{{ $order->customer_phone }}</strong>.
                 </p>
 
                 <!-- Draft Message Template -->
                 <div class="relative bg-gray-950 border border-gray-800 rounded-2xl p-4">
                     <div class="flex items-center justify-between mb-1.5">
                         <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Draft Pesan WhatsApp:</span>
-                        <button type="button" onclick="navigator.clipboard.writeText(document.getElementById('wa-admin-template').innerText); alert('Draft pesan WA berhasil disalin ke clipboard!');" class="text-[10px] text-emerald-400 hover:text-emerald-300 font-bold flex items-center gap-1">
+                        <button type="button" onclick="navigator.clipboard.writeText(document.getElementById('wa-admin-template').innerText); alert('Draft pesan WA berhasil disalin ke clipboard!');" class="text-[10px] {{ $order->isPreorder() ? 'text-fuchsia-400 hover:text-fuchsia-300' : 'text-emerald-400 hover:text-emerald-300' }} font-bold flex items-center gap-1">
                             📋 <span>Salin Teks</span>
                         </button>
                     </div>
-                    <pre id="wa-admin-template" class="text-xs font-mono text-emerald-300/90 whitespace-pre-wrap leading-relaxed select-all">{{ $waMessage }}</pre>
+                    <pre id="wa-admin-template" class="text-xs font-mono {{ $order->isPreorder() ? 'text-fuchsia-300/90' : 'text-emerald-300/90' }} whitespace-pre-wrap leading-relaxed select-all">{{ $waMessage }}</pre>
                 </div>
 
                 <div class="flex flex-col sm:flex-row gap-2.5 pt-1">
-                    <a href="{{ $waLink }}" target="_blank" class="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-extrabold text-xs shadow-xl shadow-emerald-600/30 transition-all flex items-center justify-center gap-2">
-                        <span>💬 Buka WhatsApp & Kirim Akun ↗</span>
+                    <a href="{{ $waLink }}" target="_blank" class="flex-1 py-3 px-4 rounded-xl {{ $order->isPreorder() ? 'bg-gradient-to-r from-fuchsia-600 to-pink-600 hover:from-fuchsia-500 hover:to-pink-500 shadow-fuchsia-600/30' : 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 shadow-emerald-600/30' }} text-white font-extrabold text-xs shadow-xl transition-all flex items-center justify-center gap-2">
+                        <span>💬 {{ $order->isPreorder() ? 'Buka WhatsApp & Konfirmasi Preorder ↗' : 'Buka WhatsApp & Kirim Akun ↗' }}</span>
                     </a>
                 </div>
             </div>
@@ -231,7 +256,38 @@
                             {{ $order->customer_phone }} <span>↗</span>
                         </a>
                     </div>
-                    @if($order->isJoki())
+                    @if($order->isPreorder())
+                        <div class="mt-2 p-3.5 bg-fuchsia-950/30 border border-fuchsia-500/30 rounded-2xl space-y-2">
+                            <div class="flex items-center justify-between text-fuchsia-400 font-bold text-xs uppercase tracking-wider">
+                                <span class="flex items-center gap-1.5"><span>👕</span> Spesifikasi Baju PDH</span>
+                                <span class="text-[10px] bg-fuchsia-500/20 text-fuchsia-300 px-2 py-0.5 rounded-full border border-fuchsia-500/30 font-semibold lowercase">custom</span>
+                            </div>
+                            <div class="flex justify-between py-1 border-b border-fuchsia-900/40">
+                                <span class="text-gray-400">Ukuran Baju:</span>
+                                <span class="font-bold text-white font-mono bg-fuchsia-500/20 text-fuchsia-300 px-2 py-0.5 rounded border border-fuchsia-500/30">
+                                    {{ $order->clothing_size ?? $order->target_user_id }}
+                                </span>
+                            </div>
+                            <div class="flex justify-between py-1 border-b border-fuchsia-900/40">
+                                <span class="text-gray-400">Pilihan Lengan:</span>
+                                <span class="font-bold text-white">
+                                    {{ $order->sleeve_type ?? $order->target_zone_id }}
+                                </span>
+                            </div>
+                            <div class="flex justify-between py-1 border-b border-fuchsia-900/40">
+                                <span class="text-gray-400">Bordir Dada / NIM:</span>
+                                <span class="font-bold text-cyan-300">
+                                    {{ $order->embroidery_name ?: ($order->target_nickname ?: '-') }}
+                                </span>
+                            </div>
+                            @if($order->notes)
+                                <div class="pt-1">
+                                    <span class="text-gray-400 block mb-1">Catatan Tambahan:</span>
+                                    <span class="font-medium text-gray-200 italic bg-gray-900/60 p-2 rounded-lg block border border-gray-800 text-[11px]">{{ $order->notes }}</span>
+                                </div>
+                            @endif
+                        </div>
+                    @elseif($order->isJoki())
                         <div class="flex justify-between py-1.5 border-b border-gray-800/80">
                             <span class="text-gray-400">Login Via:</span>
                             <span class="font-bold text-amber-400">{{ $order->target_zone_id }}</span>
@@ -293,6 +349,15 @@
                                         ✓ Kredensial Akun / Lisensi Terkirim:
                                     </span>
                                     <div class="p-3 bg-gray-950 rounded-xl border border-emerald-500/20 font-mono text-xs text-emerald-300 break-all select-all whitespace-pre-wrap">{{ $item->credentials_delivered }}</div>
+                                </div>
+                            @elseif($order->isPreorder())
+                                <div class="mt-3 pt-3 border-t border-gray-800 flex items-center justify-between">
+                                    <span class="text-[11px] text-fuchsia-400 font-semibold flex items-center gap-1.5">
+                                        <span>👕</span> Preorder PDH: Masuk antrean produksi konveksi
+                                    </span>
+                                    <a href="{{ $waLink }}" target="_blank" class="px-2.5 py-1 rounded-lg bg-fuchsia-600/30 hover:bg-fuchsia-600 text-fuchsia-300 hover:text-white border border-fuchsia-500/40 text-[10px] font-bold transition-all">
+                                        Konfirmasi WA ↗
+                                    </a>
                                 </div>
                             @elseif($order->isAccount() || $order->isGameAccount())
                                 <div class="mt-3 pt-3 border-t border-gray-800 flex items-center justify-between">

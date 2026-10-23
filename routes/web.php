@@ -1,11 +1,13 @@
 <?php
 
 use App\Http\Controllers\Admin\BannerController as AdminBannerController;
+use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\FlashSaleController as AdminFlashSaleController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\PaymentMethodController as AdminPaymentMethodController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
+use App\Http\Controllers\Admin\RunningTextController as AdminRunningTextController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Admin\VoucherController as AdminVoucherController;
 use App\Http\Controllers\AuthController;
@@ -62,6 +64,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
 
     // Orders Management & Payment Verification
+    Route::get('orders/export', [AdminOrderController::class, 'export'])->name('orders.export');
     Route::resource('orders', AdminOrderController::class)->only(['index', 'show']);
     Route::post('orders/{order}/confirm', [AdminOrderController::class, 'confirmPayment'])->name('orders.confirm');
     Route::post('orders/{order}/reject', [AdminOrderController::class, 'rejectPayment'])->name('orders.reject');
@@ -72,6 +75,10 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('variants/{variant}/add-stock', [AdminProductController::class, 'addStock'])->name('variants.add-stock');
     Route::delete('variants/{variant}', [AdminProductController::class, 'destroyVariant'])->name('variants.destroy');
 
+    // Category Management
+    Route::resource('categories', AdminCategoryController::class)->except(['show', 'create', 'edit']);
+    Route::patch('categories/{category}/toggle', [AdminCategoryController::class, 'toggle'])->name('categories.toggle');
+
     // Manual Payment Methods / Bank Accounts Management
     Route::resource('payment-methods', AdminPaymentMethodController::class);
     Route::patch('payment-methods/{paymentMethod}/toggle', [AdminPaymentMethodController::class, 'toggle'])->name('payment-methods.toggle');
@@ -79,6 +86,10 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     // Promo Banners & Sliders Management
     Route::resource('banners', AdminBannerController::class)->except(['show', 'create', 'edit']);
     Route::patch('banners/{banner}/toggle', [AdminBannerController::class, 'toggle'])->name('banners.toggle');
+
+    // Running Text Ticker Announcements Management
+    Route::resource('running-texts', AdminRunningTextController::class)->except(['show', 'create', 'edit']);
+    Route::patch('running-texts/{runningText}/toggle', [AdminRunningTextController::class, 'toggle'])->name('running-texts.toggle');
 
     // Flash Sale Event Management
     Route::resource('flash-sales', AdminFlashSaleController::class)->except(['show', 'create', 'edit']);
@@ -119,4 +130,3 @@ Route::get('/products/{path}', function (string $path) {
     }
     abort(404);
 })->where('path', '.*')->name('products.file');
-

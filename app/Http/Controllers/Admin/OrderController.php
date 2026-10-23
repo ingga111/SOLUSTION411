@@ -11,12 +11,90 @@ use Exception;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class OrderController extends Controller
 {
     public function __construct(
         protected OrderService $orderService
     ) {}
+
+    /**
+     * Export orders to an Excel-compatible CSV file.
+     */
+    public function export(Request $request): StreamedResponse
+    {
+        $status = $request->query('status');
+
+        $query = Order::with(['items.product', 'items.variant', 'payment'])->latest();
+
+        if ($status === 'waiting_verification') {
+            $query->where('status', OrderStatus::Processing)
+                ->whereHas('payment', fn ($q) => $q->whereNotNull('payment_proof')->where('status', '!=', PaymentStatus::Paid));
+        } elseif ($status && in_array($status, ['pending', 'processing', 'completed', 'failed', 'cancelled'], true)) {
+            $query->where('status', $status);
+        }
+
+        $filename = 'laporan-pesanan-solustion411-'.now()->format('Y-m-d_His').'.csv';
+
+        $headers = [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+            'Pragma' => 'no-cache',
+            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+            'Expires' => '0',
+        ];
+
+        return response()->streamDownload(function () use ($query) {
+            $handle = fopen('php://output', 'w');
+
+            // UTF-8 BOM for Microsoft Excel compatibility
+            fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
+
+            // Column Headers
+            fputcsv($handle, [
+                'No. Invoice',
+                'Tanggal Pesanan',
+                'Nama Pelanggan',
+                'Email Pelanggan',
+                'No. HP / WA',
+                'Tipe Produk',
+                'Item Produk & Varian',
+                'Total Nominal (Rp)',
+                'Metode Pembayaran',
+                'Nomor Rekening Tujuan',
+                'Status Pesanan',
+                'Status Pembayaran',
+                'Catatan / Notes',
+            ]);
+
+            $query->chunk(100, function ($orders) use ($handle) {
+                foreach ($orders as $order) {
+                    $itemDescriptions = $order->items->map(function ($item) {
+                        return "{$item->product_name} ({$item->variant_name}) x{$item->quantity}";
+                    })->implode('; ');
+
+                    fputcsv($handle, [
+                        $order->order_number,
+                        $order->created_at->format('Y-m-d H:i:s'),
+                        $order->customer_name,
+                        $order->customer_email,
+                        $order->customer_phone ?? '-',
+                        $order->product_type?->label() ?? $order->product_type?->value ?? '-',
+                        $itemDescriptions ?: '-',
+                        $order->total_amount,
+                        $order->payment_method,
+                        $order->payment?->account_number ?? '-',
+                        $order->status?->label() ?? $order->status?->value ?? '-',
+                        $order->payment?->status?->label() ?? $order->payment?->status?->value ?? '-',
+                        $order->notes ?? '-',
+                    ]);
+                }
+            });
+
+            fclose($handle);
+        }, $filename, $headers);
+    }
 
     /**
      * Display listing of orders with filters.
