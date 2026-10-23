@@ -33,6 +33,25 @@ class DashboardController extends Controller
         // Total available stock for accounts / limited variants
         $availableAccountStocks = ProductVariant::where('stock_type', '!=', 'unlimited')->sum('stock');
 
+        // Variants with critical low stock (<= 3 units) for alert badges
+        $lowStockVariants = ProductVariant::with('product')
+            ->where('stock_type', '!=', 'unlimited')
+            ->where('stock', '<=', 3)
+            ->where('is_active', true)
+            ->orderBy('stock')
+            ->get();
+
+        // 7-day sales trend metrics for visual analytics chart
+        $salesChartLabels = [];
+        $salesChartData = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $date = now()->subDays($i);
+            $salesChartLabels[] = $date->translatedFormat('d M');
+            $salesChartData[] = (int) Order::whereIn('status', [OrderStatus::Completed, OrderStatus::Processing])
+                ->whereDate('created_at', $date->toDateString())
+                ->sum('total_amount');
+        }
+
         // Recent 10 orders
         $recentOrders = Order::with(['items.product', 'payment'])
             ->latest()
@@ -47,7 +66,10 @@ class DashboardController extends Controller
             'processingOrders',
             'totalCustomers',
             'availableAccountStocks',
-            'recentOrders'
+            'recentOrders',
+            'lowStockVariants',
+            'salesChartLabels',
+            'salesChartData'
         ));
     }
 }
