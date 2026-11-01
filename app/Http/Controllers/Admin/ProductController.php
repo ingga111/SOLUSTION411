@@ -45,6 +45,13 @@ class ProductController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        if (! $request->filled('type') && $request->filled('category_id')) {
+            $category = Category::find($request->input('category_id'));
+            if ($category && $category->type) {
+                $request->merge(['type' => $category->type]);
+            }
+        }
+
         $validated = $request->validate([
             'category_id' => ['required', 'exists:categories,id'],
             'name' => ['required', 'string', 'max:255'],
@@ -163,7 +170,12 @@ class ProductController extends Controller
     public function edit(Product $product): View
     {
         $product->load(['category', 'variants.accountStocks']);
-        $categories = Category::active()->get();
+        $categories = Category::query()
+            ->where('is_active', true)
+            ->orWhere('id', $product->category_id)
+            ->orderBy('sort_order')
+            ->orderBy('name')
+            ->get();
         $types = ProductType::cases();
 
         return view('admin.products.edit', compact('product', 'categories', 'types'));
@@ -174,6 +186,13 @@ class ProductController extends Controller
      */
     public function update(Request $request, Product $product): RedirectResponse
     {
+        if (! $request->filled('type') && $request->filled('category_id')) {
+            $category = Category::find($request->input('category_id'));
+            if ($category && $category->type) {
+                $request->merge(['type' => $category->type]);
+            }
+        }
+
         $validated = $request->validate([
             'category_id' => ['required', 'exists:categories,id'],
             'name' => ['required', 'string', 'max:255'],

@@ -192,6 +192,14 @@ class Product extends Model
     }
 
     /**
+     * Check if product is Preorder PDH / Uniform.
+     */
+    public function isPreorder(): bool
+    {
+        return $this->type === ProductType::Preorder;
+    }
+
+    /**
      * Scope active products.
      */
     public function scopeActive(Builder $query): Builder

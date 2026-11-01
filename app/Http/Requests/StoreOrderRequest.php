@@ -44,12 +44,18 @@ class StoreOrderRequest extends FormRequest
             if ($variant && $variant->product) {
                 $product = $variant->product;
 
-                if ($product->requires_user_id) {
-                    $rules['target_user_id'] = ['required', 'string', 'max:50'];
-                }
+                if ($product->isPreorder()) {
+                    $rules['target_user_id'] = ['required', 'string', 'max:50']; // Ukuran Baju (Size)
+                    $rules['target_zone_id'] = ['required', 'string', 'max:50']; // Pilihan Lengan
+                    $rules['target_nickname'] = ['nullable', 'string', 'max:100']; // Nama Bordir Dada / NIM
+                } else {
+                    if ($product->requires_user_id) {
+                        $rules['target_user_id'] = ['required', 'string', 'max:50'];
+                    }
 
-                if ($product->requires_zone_id) {
-                    $rules['target_zone_id'] = ['required', 'string', 'max:50'];
+                    if ($product->requires_zone_id) {
+                        $rules['target_zone_id'] = ['required', 'string', 'max:50'];
+                    }
                 }
             }
         }
@@ -64,16 +70,26 @@ class StoreOrderRequest extends FormRequest
      */
     public function messages(): array
     {
-        return [
-            'variant_id.required' => 'Silakan pilih paket / nominal produk terlebih dahulu.',
+        $messages = [
+            'variant_id.required' => 'Silakan pilih variasi / paket produk terlebih dahulu.',
             'variant_id.exists' => 'Paket produk yang dipilih tidak valid.',
             'payment_method.required' => 'Silakan pilih metode pembayaran.',
             'customer_name.required' => 'Nama lengkap wajib diisi.',
-            'customer_email.required' => 'Alamat email wajib diisi untuk pengiriman bukti dan kredensial.',
+            'customer_email.required' => 'Alamat email wajib diisi untuk pengiriman bukti dan invoice.',
             'customer_email.email' => 'Format email tidak valid.',
             'customer_phone.required' => 'Nomor WhatsApp / HP wajib diisi.',
             'target_user_id.required' => 'ID Pemain / User ID wajib diisi.',
             'target_zone_id.required' => 'Zone ID / Server ID wajib diisi untuk produk ini.',
         ];
+
+        if ($this->has('variant_id')) {
+            $variant = ProductVariant::with('product')->find($this->input('variant_id'));
+            if ($variant?->product?->isPreorder()) {
+                $messages['target_user_id.required'] = 'Pilih ukuran baju (Size) untuk pesanan Preorder PDH.';
+                $messages['target_zone_id.required'] = 'Pilih jenis lengan (Pendek / Panjang) untuk pesanan Preorder PDH.';
+            }
+        }
+
+        return $messages;
     }
 }

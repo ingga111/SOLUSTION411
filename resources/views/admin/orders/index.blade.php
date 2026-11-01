@@ -1,164 +1,321 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
     
     <!-- Header with Quick Action & Export -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-zinc-800/80">
         <div>
-            <div class="flex items-center gap-2 text-xs text-gray-400 mb-1">
-                <a href="{{ route('admin.dashboard') }}" class="hover:text-cyan-400 transition-colors">Dashboard</a>
-                <span>/</span>
-                <span class="text-white">Daftar Pesanan &amp; Verifikasi</span>
+            <div class="flex items-center gap-2 text-xs text-zinc-400 mb-1.5">
+                <a href="{{ route('admin.dashboard') }}" class="hover:text-zinc-200 transition-colors">Dashboard</a>
+                <span class="text-zinc-600">/</span>
+                <span class="text-zinc-200">Daftar Pesanan &amp; Verifikasi</span>
             </div>
-            <h1 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">Verifikasi Pembayaran &amp; Pesanan</h1>
-            <p class="text-xs text-gray-400 mt-1">Periksa bukti transfer manual pembeli dan konfirmasi pengiriman produk digital.</p>
+            <h1 class="text-2xl sm:text-3xl font-bold text-white tracking-tight">Verifikasi Pembayaran &amp; Pesanan</h1>
+            <p class="text-xs text-zinc-400 mt-1">Periksa mutasi transfer pembeli, verifikasi bukti pembayaran, dan unduh laporan transaksi terstruktur.</p>
         </div>
 
-        <div class="flex flex-wrap items-center gap-2.5">
-            <!-- EXPORT TO EXCEL BUTTON -->
-            <a href="{{ route('admin.orders.export', request()->query()) }}" class="px-4 py-2.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 text-xs font-bold border border-emerald-500/40 transition-all flex items-center gap-2 shadow-sm" title="Unduh data laporan pesanan dalam format Excel CSV">
-                <span class="text-base">📊</span>
-                <span>Export ke Excel (.csv)</span>
+        <div class="flex flex-wrap items-center gap-2">
+            <!-- EXPORT EXCEL BUTTON -->
+            <a href="{{ route('admin.orders.export', array_merge(request()->query(), ['format' => 'excel'])) }}" 
+               class="px-3 py-1.5 rounded-lg bg-emerald-950/60 border border-emerald-800/60 text-emerald-300 hover:text-emerald-100 hover:bg-emerald-900/60 text-xs font-semibold transition-all inline-flex items-center gap-1.5 shadow-sm" 
+               title="Unduh laporan Excel rapi berformat warna, font, dan tabel (.xls)">
+                <svg class="w-3.5 h-3.5 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                    <line x1="8" y1="13" x2="16" y2="13"/>
+                    <line x1="8" y1="17" x2="16" y2="17"/>
+                    <line x1="10" y1="9" x2="10" y2="9"/>
+                </svg>
+                <span>Export Excel (.xls)</span>
             </a>
 
-            <a href="{{ route('admin.payment-methods.index') }}" class="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-gray-200 text-xs font-semibold border border-slate-800 transition-all flex items-center gap-1.5">
-                <span>💳 Rekening Bank</span>
+            <!-- EXPORT CSV BUTTON -->
+            <a href="{{ route('admin.orders.export', array_merge(request()->query(), ['format' => 'csv'])) }}" 
+               class="px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-800 text-xs font-medium transition-colors inline-flex items-center gap-1.5" 
+               title="Unduh data laporan pesanan standar CSV UTF-8">
+                <svg class="w-3.5 h-3.5 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="7 10 12 15 17 10"/>
+                    <line x1="12" x2="12" y1="15" y2="3"/>
+                </svg>
+                <span>Export (.csv)</span>
             </a>
-            <a href="{{ route('admin.products.index') }}" class="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-gray-200 text-xs font-semibold border border-slate-800 transition-all flex items-center gap-1.5">
-                <span>📦 Produk &amp; Stok Akun</span>
+
+            <a href="{{ route('admin.payment-methods.index') }}" class="px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-800 text-xs font-medium transition-colors inline-flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <rect width="20" height="14" x="2" y="5" rx="2"/>
+                    <line x1="2" x2="22" y1="10" y2="10"/>
+                </svg>
+                <span>Rekening Bank</span>
+            </a>
+            <a href="{{ route('admin.products.index') }}" class="px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-800 text-xs font-medium transition-colors inline-flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="m7.5 4.27 9 5.15"/>
+                    <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/>
+                    <path d="m3.3 7 8.7 5 8.7-5"/>
+                    <path d="M12 22V12"/>
+                </svg>
+                <span>Katalog Produk</span>
             </a>
         </div>
     </div>
 
     <!-- Status Filter Tabs -->
-    <div class="flex flex-wrap items-center gap-2 mb-6">
-        <a href="{{ route('admin.orders.index') }}" 
-           class="px-4 py-2 rounded-xl text-xs font-bold transition-all {{ empty($status) ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 shadow-md shadow-cyan-500/20 font-black' : 'bg-slate-900/90 border border-slate-800 text-gray-400 hover:text-white' }}">
-            Semua Pesanan ({{ $counts['all'] }})
+    <div class="flex flex-wrap items-center gap-1.5">
+        <a href="{{ route('admin.orders.index', array_filter(array_merge(request()->query(), ['status' => null]))) }}" 
+           class="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors {{ empty($status) ? 'bg-white text-zinc-950 font-semibold shadow-sm' : 'bg-zinc-900/60 border border-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-800' }}">
+            Semua ({{ $counts['all'] }})
         </a>
-        <a href="{{ route('admin.orders.index', ['status' => 'waiting_verification']) }}" 
-           class="px-4 py-2 rounded-xl text-xs font-bold transition-all relative flex items-center gap-1.5 {{ $status === 'waiting_verification' ? 'bg-cyan-600 text-white shadow-lg shadow-cyan-600/30' : 'bg-slate-900/90 border border-slate-800 text-cyan-400 hover:text-cyan-300' }}">
-            <span>🔔 Menunggu Verifikasi</span>
-            <span class="px-1.5 py-0.5 rounded-md text-[10px] font-black {{ $counts['waiting_verification'] > 0 ? 'bg-cyan-400 text-slate-950 animate-pulse' : 'bg-slate-800 text-gray-300' }}">
-                {{ $counts['waiting_verification'] }}
-            </span>
+        <a href="{{ route('admin.orders.index', array_filter(array_merge(request()->query(), ['status' => 'waiting_verification']))) }}" 
+           class="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors flex items-center gap-1.5 {{ $status === 'waiting_verification' ? 'bg-zinc-800 text-white border border-zinc-700 font-semibold' : 'bg-zinc-900/60 border border-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-800' }}">
+            <span>Perlu Verifikasi</span>
+            @if($counts['waiting_verification'] > 0)
+                <span class="px-1.5 py-0.2 rounded-full text-[10px] font-semibold tabular-nums bg-amber-500/20 text-amber-400 border border-amber-500/30">
+                    {{ $counts['waiting_verification'] }}
+                </span>
+            @endif
         </a>
-        <a href="{{ route('admin.orders.index', ['status' => 'pending']) }}" 
-           class="px-4 py-2 rounded-xl text-xs font-bold transition-all {{ $status === 'pending' ? 'bg-amber-600 text-white shadow-lg shadow-amber-600/30' : 'bg-slate-900/90 border border-slate-800 text-amber-400 hover:text-amber-300' }}">
-            Menunggu Transfer ({{ $counts['pending'] }})
+        <a href="{{ route('admin.orders.index', array_filter(array_merge(request()->query(), ['status' => 'pending']))) }}" 
+           class="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors {{ $status === 'pending' ? 'bg-zinc-800 text-white border border-zinc-700 font-semibold' : 'bg-zinc-900/60 border border-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-800' }}">
+            Menunggu Bayar ({{ $counts['pending'] }})
         </a>
-        <a href="{{ route('admin.orders.index', ['status' => 'completed']) }}" 
-           class="px-4 py-2 rounded-xl text-xs font-bold transition-all {{ $status === 'completed' ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30' : 'bg-slate-900/90 border border-slate-800 text-emerald-400 hover:text-emerald-300' }}">
+        <a href="{{ route('admin.orders.index', array_filter(array_merge(request()->query(), ['status' => 'completed']))) }}" 
+           class="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors {{ $status === 'completed' ? 'bg-zinc-800 text-white border border-zinc-700 font-semibold' : 'bg-zinc-900/60 border border-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-800' }}">
             Selesai / Lunas ({{ $counts['completed'] }})
         </a>
-        <a href="{{ route('admin.orders.index', ['status' => 'failed']) }}" 
-           class="px-4 py-2 rounded-xl text-xs font-bold transition-all {{ $status === 'failed' ? 'bg-rose-600 text-white shadow-lg shadow-rose-600/30' : 'bg-slate-900/90 border border-slate-800 text-rose-400 hover:text-rose-300' }}">
+        <a href="{{ route('admin.orders.index', array_filter(array_merge(request()->query(), ['status' => 'failed']))) }}" 
+           class="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors {{ $status === 'failed' ? 'bg-zinc-800 text-white border border-zinc-700 font-semibold' : 'bg-zinc-900/60 border border-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-800' }}">
             Ditolak / Batal ({{ $counts['failed'] }})
         </a>
     </div>
 
+    <!-- Advanced Precision Filter Bar -->
+    <div class="rounded-xl p-4 bg-zinc-900/70 border border-zinc-800 space-y-3">
+        <form method="GET" action="{{ route('admin.orders.index') }}" class="space-y-3">
+            @if(request()->filled('status'))
+                <input type="hidden" name="status" value="{{ request('status') }}">
+            @endif
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-2.5">
+                <!-- 1. Search Keyword -->
+                <div class="lg:col-span-2">
+                    <label class="block text-[10px] font-mono text-zinc-400 uppercase tracking-wider mb-1">Cari Keyword</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none text-zinc-500 text-xs">🔍</span>
+                        <input type="text" name="search" value="{{ request('search') }}" placeholder="Invoice, nama, HP, ID game..." 
+                               class="w-full pl-8 pr-3 py-1.5 rounded-lg bg-zinc-950 border border-zinc-800 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-zinc-500 font-mono">
+                    </div>
+                </div>
+
+                <!-- 2. Product Type Filter -->
+                <div>
+                    <label class="block text-[10px] font-mono text-zinc-400 uppercase tracking-wider mb-1">Tipe Produk</label>
+                    <select name="product_type" class="w-full py-1.5 px-2.5 rounded-lg bg-zinc-950 border border-zinc-800 text-xs text-zinc-300 focus:outline-none focus:border-zinc-500">
+                        <option value="">Semua Tipe</option>
+                        @foreach($productTypes as $type)
+                            <option value="{{ $type->value }}" {{ request('product_type') === $type->value ? 'selected' : '' }}>
+                                {{ $type->label() }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <!-- 3. Specific Product Filter -->
+                <div>
+                    <label class="block text-[10px] font-mono text-zinc-400 uppercase tracking-wider mb-1">Produk Spesifik</label>
+                    <select name="product_id" class="w-full py-1.5 px-2.5 rounded-lg bg-zinc-950 border border-zinc-800 text-xs text-zinc-300 focus:outline-none focus:border-zinc-500">
+                        <option value="">Semua Produk</option>
+                        @foreach($products as $prod)
+                            <option value="{{ $prod->id }}" {{ (string) request('product_id') === (string) $prod->id ? 'selected' : '' }}>
+                                {{ $prod->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <!-- 4. Clothing Size Filter (for Preorder) -->
+                <div>
+                    <label class="block text-[10px] font-mono text-zinc-400 uppercase tracking-wider mb-1">Ukuran (Preorder)</label>
+                    <select name="clothing_size" class="w-full py-1.5 px-2.5 rounded-lg bg-zinc-950 border border-zinc-800 text-xs text-zinc-300 focus:outline-none focus:border-zinc-500 font-mono">
+                        <option value="">Semua Ukuran</option>
+                        @foreach($clothingSizes as $sz)
+                            <option value="{{ $sz }}" {{ request('clothing_size') === $sz ? 'selected' : '' }}>
+                                Size {{ $sz }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <!-- 5. Action Buttons -->
+                <div class="flex items-end gap-1.5">
+                    <button type="submit" class="flex-1 py-1.5 px-3 rounded-lg bg-zinc-100 hover:bg-white text-zinc-950 text-xs font-bold transition-all shadow-sm">
+                        Filter
+                    </button>
+                    @if(request()->anyFilled(['search', 'product_type', 'product_id', 'clothing_size', 'date_from', 'date_to']))
+                        <a href="{{ route('admin.orders.index', request()->filled('status') ? ['status' => request('status')] : []) }}" 
+                           class="py-1.5 px-2.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white text-xs font-mono transition-colors" title="Reset Semua Filter">
+                            ✕
+                        </a>
+                    @endif
+                </div>
+            </div>
+
+            <!-- Date Range & Active Filter Badges Row -->
+            <div class="pt-2 border-t border-zinc-800/60 flex flex-wrap items-center justify-between gap-3 text-xs">
+                <div class="flex flex-wrap items-center gap-2">
+                    <span class="text-[10px] font-mono text-zinc-500 uppercase tracking-wider">Periode Tanggal:</span>
+                    <input type="date" name="date_from" value="{{ request('date_from') }}" 
+                           class="py-1 px-2 rounded-md bg-zinc-950 border border-zinc-800 text-[11px] text-zinc-300 font-mono focus:outline-none focus:border-zinc-500">
+                    <span class="text-zinc-600 text-xs">s/d</span>
+                    <input type="date" name="date_to" value="{{ request('date_to') }}" 
+                           class="py-1 px-2 rounded-md bg-zinc-950 border border-zinc-800 text-[11px] text-zinc-300 font-mono focus:outline-none focus:border-zinc-500">
+                    <button type="submit" class="px-2 py-1 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-[10px] font-mono transition-colors">
+                        Terapkan Tanggal
+                    </button>
+                </div>
+
+                <!-- Quick info of current filtered orders -->
+                <div class="text-[11px] font-mono text-zinc-400">
+                    Total Ditemukan: <span class="text-zinc-100 font-bold tabular-nums">{{ $orders->total() }}</span> pesanan
+                </div>
+            </div>
+        </form>
+    </div>
+
     <!-- Orders Table with Modern Clean Styling -->
-    <div class="glass-card rounded-3xl p-6 border border-slate-800 shadow-xl">
-        <div class="overflow-x-auto rounded-2xl border border-slate-800/80">
-            <table class="w-full text-left text-xs text-gray-300">
-                <thead class="bg-slate-900/90 text-gray-400 uppercase tracking-wider text-[10px] border-b border-slate-800">
+    <div class="rounded-xl p-5 sm:p-6 bg-zinc-900/60 border border-zinc-800">
+        <div class="overflow-x-auto rounded-lg border border-zinc-800">
+            <table class="w-full text-left text-xs text-zinc-300">
+                <thead class="bg-zinc-900/90 text-zinc-400 uppercase tracking-wider text-[10px] font-semibold border-b border-zinc-800">
                     <tr>
-                        <th class="py-3.5 px-4 font-bold whitespace-nowrap">No. Pesanan &amp; Waktu</th>
-                        <th class="py-3.5 px-4 font-bold whitespace-nowrap">Customer</th>
-                        <th class="py-3.5 px-4 font-bold whitespace-nowrap">Produk Dibeli</th>
-                        <th class="py-3.5 px-4 font-bold whitespace-nowrap">Rekening Tujuan</th>
-                        <th class="py-3.5 px-4 font-bold whitespace-nowrap">Total Bayar</th>
-                        <th class="py-3.5 px-4 font-bold whitespace-nowrap">Bukti Transfer</th>
-                        <th class="py-3.5 px-4 font-bold whitespace-nowrap">Status Pesanan</th>
-                        <th class="py-3.5 px-4 font-bold text-right whitespace-nowrap">Aksi</th>
+                        <th class="py-2.5 px-3.5 whitespace-nowrap">No. Pesanan &amp; Waktu</th>
+                        <th class="py-2.5 px-3.5 whitespace-nowrap">Customer</th>
+                        <th class="py-2.5 px-3.5 whitespace-nowrap">Produk Dibeli</th>
+                        <th class="py-2.5 px-3.5 whitespace-nowrap">Metode</th>
+                        <th class="py-2.5 px-3.5 whitespace-nowrap">Total Bayar</th>
+                        <th class="py-2.5 px-3.5 whitespace-nowrap">Bukti Transfer</th>
+                        <th class="py-2.5 px-3.5 whitespace-nowrap">Status</th>
+                        <th class="py-2.5 px-3.5 font-medium text-right whitespace-nowrap">Aksi</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-800/60 bg-slate-950/40">
+                <tbody class="divide-y divide-zinc-800/60 bg-zinc-950/40">
                     @forelse($orders as $order)
-                        <tr class="hover:bg-slate-900/50 transition-colors">
-                            <td class="py-3.5 px-4 whitespace-nowrap">
-                                <a href="{{ route('admin.orders.show', $order->id) }}" class="font-mono font-bold text-cyan-400 hover:text-cyan-300 block">
+                        <tr class="hover:bg-zinc-900/50 transition-colors">
+                            <td class="py-2.5 px-3.5 whitespace-nowrap font-mono">
+                                <a href="{{ route('admin.orders.show', $order->id) }}" class="font-medium text-xs text-white hover:text-cyan-400 transition-colors block">
                                     #{{ $order->order_number }}
                                 </a>
-                                <span class="text-[10px] text-gray-500 block mt-0.5">
+                                <span class="text-[11px] text-zinc-500 font-sans block mt-0.5">
                                     {{ $order->created_at->format('d M Y, H:i') }}
                                 </span>
                             </td>
-                            <td class="py-3.5 px-4">
-                                <span class="font-bold text-white block">{{ $order->customer_name }}</span>
-                                <span class="text-[11px] text-gray-400 font-mono block">{{ $order->customer_email }}</span>
-                                <span class="text-[10px] text-gray-500 font-mono">{{ $order->customer_phone ?? '-' }}</span>
+                            <td class="py-2.5 px-3.5">
+                                <span class="font-medium text-xs text-zinc-200 block truncate max-w-[150px]">{{ $order->customer_name }}</span>
+                                <span class="text-[11px] text-zinc-500 font-mono block truncate max-w-[150px]">{{ $order->customer_email }}</span>
+                                <span class="text-[10px] text-zinc-500 font-mono">{{ $order->customer_phone ?? '-' }}</span>
                             </td>
-                            <td class="py-3.5 px-4">
+                            <td class="py-2.5 px-3.5">
                                 @foreach($order->items as $item)
                                     <div>
-                                        <span class="font-semibold text-white">{{ $item->product_name }}</span>
-                                        <span class="text-[10px] text-cyan-300">({{ $item->variant_name }})</span>
+                                        <span class="font-medium text-xs text-zinc-200">{{ $item->product_name }}</span>
+                                        <span class="text-[11px] text-zinc-400">({{ $item->variant_name }})</span>
                                     </div>
                                 @endforeach
+
+                                @if($order->isPreorder())
+                                    <div class="mt-1 flex flex-wrap items-center gap-1">
+                                        <span class="px-1.5 py-0.2 rounded text-[10px] font-mono font-bold bg-fuchsia-500/10 text-fuchsia-400 border border-fuchsia-500/20">
+                                            Size: {{ $order->clothing_size ?: '-' }}
+                                        </span>
+                                        @if($order->sleeve_type)
+                                            <span class="px-1.5 py-0.2 rounded text-[10px] font-mono bg-zinc-800 text-zinc-300 border border-zinc-700">
+                                                {{ $order->sleeve_type }}
+                                            </span>
+                                        @endif
+                                        @if($order->embroidery_name)
+                                            <span class="px-1.5 py-0.2 rounded text-[10px] font-mono bg-zinc-800 text-zinc-300 border border-zinc-700" title="Bordir Nama">
+                                                "{{ $order->embroidery_name }}"
+                                            </span>
+                                        @endif
+                                    </div>
+                                @elseif($order->isGame() || (!empty($order->target_user_id) && !$order->isPreorder()))
+                                    <div class="mt-1 flex flex-wrap items-center gap-1">
+                                        @if($order->target_user_id)
+                                            <span class="px-1.5 py-0.2 rounded text-[10px] font-mono bg-cyan-500/10 text-cyan-400 border border-cyan-500/20" title="User ID & Server">
+                                                ID: {{ $order->target_user_id }}{{ $order->target_zone_id ? ' ('.$order->target_zone_id.')' : '' }}
+                                            </span>
+                                        @endif
+                                        @if($order->target_nickname)
+                                            <span class="px-1.5 py-0.2 rounded text-[10px] font-mono bg-zinc-800 text-zinc-300 border border-zinc-700">
+                                                {{ $order->target_nickname }}
+                                            </span>
+                                        @endif
+                                    </div>
+                                @endif
                             </td>
-                            <td class="py-3.5 px-4 whitespace-nowrap">
-                                <span class="px-2.5 py-1 rounded-lg bg-slate-800 border border-slate-700 text-cyan-300 font-mono text-[11px] font-bold">
+                            <td class="py-2.5 px-3.5 whitespace-nowrap font-mono">
+                                <span class="text-xs text-zinc-300">
                                     {{ $order->payment_method }}
                                 </span>
                                 @if($order->payment?->account_number)
-                                    <span class="text-[10px] text-gray-400 block mt-1 font-mono">
+                                    <span class="text-[10px] text-zinc-500 block mt-0.5">
                                         {{ $order->payment->account_number }}
                                     </span>
                                 @endif
                             </td>
-                            <td class="py-3.5 px-4 font-black text-white text-sm font-mono whitespace-nowrap">
+                            <td class="py-2.5 px-3.5 font-mono tabular-nums font-semibold text-xs text-zinc-200 whitespace-nowrap">
                                 Rp {{ number_format($order->total_amount, 0, ',', '.') }}
                             </td>
-                            <td class="py-3.5 px-4 whitespace-nowrap">
+                            <td class="py-2.5 px-3.5 whitespace-nowrap">
                                 @if($order->payment?->payment_proof)
-                                    <a href="{{ asset('storage/'.$order->payment->payment_proof) }}" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-cyan-500/15 border border-cyan-500/30 text-cyan-300 hover:text-white hover:bg-cyan-500/25 text-xs font-bold transition-all shadow-sm">
-                                        <span>📎 Lihat Bukti</span>
+                                    <a href="{{ asset('storage/'.$order->payment->payment_proof) }}" target="_blank" class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white border border-zinc-700/50 transition-colors">
+                                        <span>Lihat Bukti</span>
+                                        <span class="text-zinc-500">↗</span>
                                     </a>
                                 @else
-                                    <span class="text-xs text-gray-500 italic">Belum ada bukti</span>
+                                    <span class="text-[11px] text-zinc-500 italic">Belum ada</span>
                                 @endif
                             </td>
-                            <td class="py-3.5 px-4 whitespace-nowrap">
+                            <td class="py-2.5 px-3.5 whitespace-nowrap">
                                 @if($order->status->value === 'processing' && $order->payment?->payment_proof && $order->payment?->status?->value !== 'paid')
-                                    <span class="inline-flex items-center gap-1.5 whitespace-nowrap px-3 py-1.5 rounded-full text-xs font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-sm animate-pulse">
-                                        <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
+                                    <span class="inline-flex items-center gap-1.5 whitespace-nowrap px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
                                         <span>Perlu Verifikasi</span>
                                     </span>
                                 @elseif($order->status->value === 'completed')
-                                    <span class="inline-flex items-center gap-1.5 whitespace-nowrap px-3 py-1.5 rounded-full text-xs font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-sm">
-                                        <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
-                                        <span>✓ Lunas &amp; Selesai</span>
+                                    <span class="inline-flex items-center gap-1.5 whitespace-nowrap px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                                        <span>Lunas &amp; Selesai</span>
                                     </span>
                                 @elseif($order->status->value === 'processing')
-                                    <span class="inline-flex items-center gap-1.5 whitespace-nowrap px-3 py-1.5 rounded-full text-xs font-bold bg-blue-500/20 text-blue-300 border border-blue-500/40 shadow-sm">
-                                        <span class="w-2 h-2 rounded-full bg-blue-400"></span>
+                                    <span class="inline-flex items-center gap-1.5 whitespace-nowrap px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
                                         <span>Sedang Diproses</span>
                                     </span>
                                 @elseif($order->status->value === 'pending')
-                                    <span class="inline-flex items-center gap-1.5 whitespace-nowrap px-3 py-1.5 rounded-full text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-sm">
-                                        <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+                                    <span class="inline-flex items-center gap-1.5 whitespace-nowrap px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
                                         <span>Menunggu Bayar</span>
                                     </span>
                                 @else
-                                    <span class="inline-flex items-center gap-1.5 whitespace-nowrap px-3 py-1.5 rounded-full text-xs font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40 shadow-sm">
-                                        <span class="w-2 h-2 rounded-full bg-rose-400"></span>
+                                    <span class="inline-flex items-center gap-1.5 whitespace-nowrap px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-rose-500/10 text-rose-400 border border-rose-500/20">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span>
                                         <span>Ditolak / Batal</span>
                                     </span>
                                 @endif
                             </td>
-                            <td class="py-3.5 px-4 text-right whitespace-nowrap">
+                            <td class="py-2.5 px-3.5 text-right whitespace-nowrap">
                                 <div class="flex items-center justify-end gap-1.5">
-                                    <a href="{{ route('admin.orders.show', $order->id) }}" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-cyan-400 hover:text-white font-bold transition-all text-xs">
+                                    <a href="{{ route('admin.orders.show', $order->id) }}" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-zinc-800 hover:bg-zinc-700 text-zinc-200 hover:text-white font-medium transition-colors text-xs border border-zinc-700/50">
                                         <span>Detail</span>
-                                        <span>→</span>
+                                        <span class="text-zinc-500">→</span>
                                     </a>
                                     @if(in_array($order->status->value, ['pending', 'processing']) && $order->status->value !== 'completed' && $order->payment?->status?->value !== 'paid')
                                         <form action="{{ route('admin.orders.confirm', $order->id) }}" method="POST" onsubmit="return confirm('Konfirmasi pembayaran pesanan #{{ $order->order_number }} dan proses pesanan ke pelanggan?');" class="inline">
                                             @csrf
-                                            <button type="submit" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-black text-xs transition-all shadow-md shadow-emerald-600/20">
-                                                Konfirmasi ✓
+                                            <button type="submit" class="px-2.5 py-1 rounded-md bg-emerald-950/40 hover:bg-emerald-900/60 text-emerald-300 border border-emerald-800/40 text-xs font-medium transition-colors">
+                                                Konfirmasi
                                             </button>
                                         </form>
                                     @endif
@@ -167,7 +324,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="text-center py-12 text-gray-500">
+                            <td colspan="8" class="text-center py-10 text-zinc-500">
                                 Tidak ada data pesanan yang sesuai dengan filter.
                             </td>
                         </tr>
@@ -176,9 +333,11 @@
             </table>
         </div>
 
-        <div class="mt-6">
-            {{ $orders->links() }}
-        </div>
+        @if($orders->hasPages())
+            <div class="mt-4 pt-4 border-t border-zinc-800">
+                {{ $orders->links() }}
+            </div>
+        @endif
     </div>
 
 </div>

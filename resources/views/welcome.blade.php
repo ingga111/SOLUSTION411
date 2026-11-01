@@ -1,60 +1,59 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-20">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-5 pb-16">
     
-    <!-- 1. HERO BANNER CAROUSEL (solustion411 Modern Slider - Admin Configurable) -->
-    <div class="relative rounded-3xl overflow-hidden glass-card border border-cyan-500/25 mb-8 sm:mb-10 shadow-2xl group" id="hero-slider-container">
-        <div class="relative w-full aspect-[16/10] sm:aspect-[21/9] min-h-[300px] sm:min-h-[360px] md:min-h-[420px] overflow-hidden" id="slider-track">
+    <!-- 1. HERO BANNER (Linear Precision Slider) -->
+    <div class="relative rounded-2xl overflow-hidden bg-zinc-950 border border-zinc-200 dark:border-zinc-800/80 mb-6 group" id="hero-slider-container">
+        <div class="relative w-full aspect-[16/9] sm:aspect-[21/9] min-h-[260px] sm:min-h-[320px] md:min-h-[380px] overflow-hidden" id="slider-track">
             @forelse($banners as $index => $banner)
-                <div class="banner-slide absolute inset-0 w-full h-full transition-opacity duration-700 ease-in-out {{ $index === 0 ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none' }}" data-index="{{ $index }}">
+                <div class="banner-slide absolute inset-0 w-full h-full transition-opacity duration-500 ease-in-out {{ $index === 0 ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none' }}" data-index="{{ $index }}">
                     <!-- Background: Uploaded Image or Dynamic Gradient -->
                     @if($banner->getImageUrl())
                         <img src="{{ $banner->getImageUrl() }}" alt="{{ $banner->title }}" class="absolute inset-0 w-full h-full object-cover">
-                        <div class="absolute inset-0 bg-gradient-to-r from-slate-950/95 via-slate-950/60 to-transparent"></div>
+                        <div class="absolute inset-0 bg-gradient-to-r from-zinc-950 via-zinc-950/70 to-transparent"></div>
                     @else
-                        <div class="absolute inset-0 bg-gradient-to-r {{ $banner->gradient ?? 'from-cyan-950 via-slate-900 to-indigo-950' }}"></div>
-                        <!-- Ambient Gamer Glow & Decorative Graphics -->
-                        <div class="absolute -right-10 -bottom-10 w-96 h-96 bg-cyan-500/15 rounded-full blur-3xl pointer-events-none"></div>
-                        <div class="absolute right-12 top-1/2 -translate-y-1/2 hidden md:flex items-center justify-center opacity-25 pointer-events-none text-9xl">
+                        <div class="absolute inset-0 bg-gradient-to-r from-zinc-950 via-zinc-900 to-zinc-950"></div>
+                        <div class="absolute -right-10 -bottom-10 w-96 h-96 bg-zinc-800/30 rounded-full blur-3xl pointer-events-none"></div>
+                        <div class="absolute right-12 top-1/2 -translate-y-1/2 hidden md:flex items-center justify-center opacity-10 pointer-events-none text-9xl">
                             🎮
                         </div>
                     @endif
 
                     <!-- Slide Content Overlay -->
-                    <div class="relative z-20 h-full flex flex-col justify-center px-6 sm:px-12 md:px-16 py-6 sm:py-8 max-w-2xl">
-                        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] sm:text-[11px] font-black uppercase bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 mb-3 w-fit backdrop-blur-md">
-                            <span class="animate-pulse">⚡</span> {{ $banner->badge_text ?? 'PROMO SPESIAL' }}
+                    <div class="relative z-20 h-full flex flex-col justify-center px-6 sm:px-12 md:px-16 py-6 max-w-2xl">
+                        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-[10px] font-mono font-semibold uppercase tracking-wider bg-zinc-900/80 text-zinc-300 border border-zinc-700/80 mb-3 w-fit backdrop-blur-md">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                            {{ $banner->badge_text ?? 'PROMO RESMI' }}
                         </div>
-                        <h2 class="text-2xl sm:text-4xl md:text-5xl font-black text-white tracking-tight leading-tight sm:leading-tight drop-shadow-md">
+                        <h2 class="text-2xl sm:text-4xl md:text-5xl font-extrabold text-white tracking-tight leading-tight">
                             {{ $banner->title }}
                         </h2>
                         @if($banner->subtitle)
-                            <p class="mt-2 sm:mt-3 text-xs sm:text-sm md:text-base text-gray-300 line-clamp-2 max-w-xl leading-relaxed drop-shadow">
+                            <p class="mt-2 text-xs sm:text-sm text-zinc-300 line-clamp-2 max-w-xl leading-relaxed">
                                 {{ $banner->subtitle }}
                             </p>
                         @endif
 
-                        <div class="mt-5 sm:mt-7 flex flex-wrap items-center gap-3">
-                            <a href="{{ $banner->target_url ?? '#catalog-section' }}" class="px-6 sm:px-8 py-3 rounded-2xl bg-gradient-to-r from-cyan-500 via-blue-600 to-indigo-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-black text-xs sm:text-sm shadow-lg shadow-cyan-500/25 hover:scale-105 active:scale-95 transition-all flex items-center gap-2">
-                                <span>Top Up Sekarang</span>
+                        <div class="mt-5 flex flex-wrap items-center gap-3">
+                            <a href="{{ $banner->target_url ?? '#catalog-section' }}" class="px-5 py-2.5 rounded-lg bg-zinc-100 hover:bg-white text-zinc-950 font-bold text-xs font-mono transition-all flex items-center gap-2 shadow-sm">
+                                <span>Beli Sekarang</span>
                                 <span>→</span>
                             </a>
-                            <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-300 backdrop-blur-md bg-slate-950/60 px-3.5 py-2 rounded-xl border border-slate-700/60">
-                                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                            <span class="inline-flex items-center gap-1.5 text-xs font-mono text-zinc-400 bg-zinc-900/80 px-3 py-2 rounded-lg border border-zinc-800 backdrop-blur-sm">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                                 <span>Proses 1-3 Detik</span>
                             </span>
                         </div>
                     </div>
                 </div>
             @empty
-                <!-- Fallback slide if no banner seeded -->
-                <div class="banner-slide absolute inset-0 w-full h-full bg-gradient-to-r from-cyan-950 via-slate-900 to-indigo-950 flex flex-col justify-center px-6 sm:px-16 py-6 sm:py-8">
-                    <span class="px-3 py-1 rounded-full text-xs font-extrabold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 w-fit mb-3">⚡ SOLUSTION411 ID</span>
-                    <h2 class="text-2xl sm:text-5xl font-black text-white tracking-tight">Top Up Game Termurah &amp; Tercepat</h2>
-                    <p class="text-xs sm:text-sm text-gray-300 mt-2">Mobile Legends, Free Fire, Valorant, &amp; Akun Sultan Bergaransi Anti-Hackback.</p>
-                    <div class="mt-6">
-                        <a href="#catalog-section" class="px-6 py-3 rounded-2xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-black text-xs transition-all inline-flex items-center gap-2 shadow-lg shadow-cyan-500/20">
+                <div class="banner-slide absolute inset-0 w-full h-full bg-zinc-950 flex flex-col justify-center px-6 sm:px-16 py-6">
+                    <span class="px-2.5 py-0.5 rounded text-[10px] font-mono font-bold bg-zinc-800 text-zinc-300 border border-zinc-700 w-fit mb-2">⚡ SOLUSTION411 ID</span>
+                    <h2 class="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">Top Up Game Cepat &amp; Bergaransi</h2>
+                    <p class="text-xs sm:text-sm text-zinc-400 mt-1">Mobile Legends, Free Fire, Valorant &amp; Akun Digital Terpercaya.</p>
+                    <div class="mt-5">
+                        <a href="#catalog-section" class="px-5 py-2.5 rounded-lg bg-zinc-100 hover:bg-white text-zinc-950 font-bold text-xs font-mono transition-all inline-flex items-center gap-2 shadow-sm">
                             <span>Mulai Belanja</span>
                             <span>→</span>
                         </a>
@@ -64,112 +63,102 @@
         </div>
 
         <!-- Slider Navigation Controls -->
-        <button type="button" onclick="prevSlide()" class="absolute left-3.5 top-1/2 -translate-y-1/2 z-30 w-10 h-10 rounded-2xl bg-slate-950/70 hover:bg-slate-900 text-white border border-slate-700/80 flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 backdrop-blur-sm" aria-label="Slide Sebelumnya">
+        <button type="button" onclick="prevSlide()" class="absolute left-3 top-1/2 -translate-y-1/2 z-30 w-8 h-8 rounded-lg bg-zinc-900/80 hover:bg-zinc-800 text-zinc-300 border border-zinc-700/80 flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 backdrop-blur-sm" aria-label="Slide Sebelumnya">
             ❮
         </button>
-        <button type="button" onclick="nextSlide()" class="absolute right-3.5 top-1/2 -translate-y-1/2 z-30 w-10 h-10 rounded-2xl bg-slate-950/70 hover:bg-slate-900 text-white border border-slate-700/80 flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 backdrop-blur-sm" aria-label="Slide Selanjutnya">
+        <button type="button" onclick="nextSlide()" class="absolute right-3 top-1/2 -translate-y-1/2 z-30 w-8 h-8 rounded-lg bg-zinc-900/80 hover:bg-zinc-800 text-zinc-300 border border-zinc-700/80 flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 backdrop-blur-sm" aria-label="Slide Selanjutnya">
             ❯
         </button>
 
-        <!-- Slider Indicators Dots -->
-        <div class="absolute bottom-3 sm:bottom-4 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2">
+        <!-- Slider Indicators Bars -->
+        <div class="absolute bottom-3 left-1/2 -translate-x-1/2 z-30 flex items-center gap-1.5">
             @foreach($banners as $index => $banner)
-                <button type="button" onclick="goToSlide({{ $index }})" class="slider-dot h-2 sm:h-2.5 rounded-full transition-all {{ $index === 0 ? 'bg-cyan-400 w-7 sm:w-8' : 'bg-slate-700 w-2 sm:w-2.5 hover:bg-slate-500' }}" aria-label="Go to slide {{ $index + 1 }}"></button>
+                <button type="button" onclick="goToSlide({{ $index }})" class="slider-dot h-1.5 rounded-full transition-all {{ $index === 0 ? 'bg-zinc-100 w-6' : 'bg-zinc-600/70 w-1.5 hover:bg-zinc-400' }}" aria-label="Slide {{ $index + 1 }}"></button>
             @endforeach
         </div>
     </div>
 
-    <!-- 2. FLASH SALE / PROMO HARI INI TICKER (Admin Managed) -->
+    <!-- 2. FLASH SALE / PROMO HARI INI (Linear Precision Card) -->
     @if($flashSale)
-        <a href="{{ $flashSale->target_url ?? '#catalog-section' }}" class="block group mb-8 sm:mb-10">
-            <div class="glass-card rounded-2xl p-4 sm:p-5 border border-amber-500/30 bg-gradient-to-r from-amber-950/30 via-slate-900/80 to-orange-950/30 flex flex-col sm:flex-row items-center justify-between gap-4 hover:border-amber-500/60 transition-all shadow-xl">
-                <div class="flex items-center gap-3.5 w-full sm:w-auto">
-                    <div class="w-11 h-11 rounded-2xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400 text-2xl font-bold flex-shrink-0 group-hover:scale-110 transition-transform">
+        <a href="{{ $flashSale->target_url ?? '#catalog-section' }}" class="block group mb-6">
+            <div class="rounded-xl p-3.5 sm:p-4 border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/80 flex flex-col sm:flex-row items-center justify-between gap-3 hover:border-zinc-400 dark:hover:border-zinc-700 transition-all shadow-sm">
+                <div class="flex items-center gap-3 w-full sm:w-auto">
+                    <div class="w-8 h-8 rounded-lg bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 flex items-center justify-center text-zinc-900 dark:text-zinc-100 text-sm font-mono flex-shrink-0">
                         🔥
                     </div>
                     <div>
                         <div class="flex items-center gap-2 flex-wrap">
-                            <h3 class="text-sm sm:text-base font-black text-white group-hover:text-amber-300 transition-colors">{{ $flashSale->title }}</h3>
-                            <span class="px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-300 text-[10px] font-black border border-rose-500/30 animate-pulse">{{ $flashSale->badge_text }}</span>
+                            <h3 class="text-xs sm:text-sm font-bold text-zinc-900 dark:text-zinc-100 font-mono">{{ $flashSale->title }}</h3>
+                            <span class="px-2 py-0.2 rounded bg-rose-500/10 text-rose-600 dark:text-rose-400 text-[10px] font-mono font-bold border border-rose-500/20 uppercase">{{ $flashSale->badge_text }}</span>
                         </div>
                         @if($flashSale->subtitle)
-                            <p class="text-xs text-gray-400 mt-0.5">{{ $flashSale->subtitle }}</p>
+                            <p class="text-[11px] text-zinc-500 dark:text-zinc-400">{{ $flashSale->subtitle }}</p>
                         @endif
                     </div>
                 </div>
 
                 @if($flashSale->end_time)
-                    <div class="flex items-center gap-2 text-xs font-mono font-bold text-amber-300 bg-slate-950/80 px-4 py-2 rounded-xl border border-amber-500/30 flex-shrink-0 w-full sm:w-auto justify-center" id="flash-sale-timer" data-endtime="{{ $flashSale->end_time->toISOString() }}">
-                        <span class="text-[11px] font-sans text-gray-400">Berakhir dalam:</span>
-                        <span class="px-2 py-1 bg-amber-500/20 rounded-lg text-amber-300 font-black" id="fs-hours">00</span>:
-                        <span class="px-2 py-1 bg-amber-500/20 rounded-lg text-amber-300 font-black" id="fs-minutes">00</span>:
-                        <span class="px-2 py-1 bg-amber-500/20 rounded-lg text-amber-300 font-black" id="fs-seconds">00</span>
+                    <div class="flex items-center gap-2 text-xs font-mono text-zinc-700 dark:text-zinc-300 bg-zinc-50 dark:bg-zinc-950 px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-800 flex-shrink-0 w-full sm:w-auto justify-center" id="flash-sale-timer" data-endtime="{{ $flashSale->end_time->toISOString() }}">
+                        <span class="text-[10px] text-zinc-500 uppercase tracking-wider">Berakhir:</span>
+                        <span class="px-1.5 py-0.5 bg-zinc-200 dark:bg-zinc-800 rounded font-bold" id="fs-hours">00</span>:
+                        <span class="px-1.5 py-0.5 bg-zinc-200 dark:bg-zinc-800 rounded font-bold" id="fs-minutes">00</span>:
+                        <span class="px-1.5 py-0.5 bg-zinc-200 dark:bg-zinc-800 rounded font-bold" id="fs-seconds">00</span>
                     </div>
                 @endif
             </div>
         </a>
     @endif
 
-    <!-- 3. CATEGORY TABS FILTER (Clean Modern Pills) -->
-    <div class="-mx-4 px-4 sm:mx-0 sm:px-0 mb-8 overflow-x-auto pb-2 scrollbar-none">
-        <div class="flex items-center gap-2 sm:gap-2.5 min-w-max">
-            <button type="button" onclick="filterCategory('all', this)" class="category-pill active-pill px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl sm:rounded-2xl text-xs font-black transition-all flex items-center gap-2 bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 shadow-md shadow-cyan-500/20 border border-cyan-400/40">
-                <span>🔥</span>
+    <!-- 3. LINEAR SEGMENTED CATEGORY TABS -->
+    <div class="-mx-4 px-4 sm:mx-0 sm:px-0 mb-6 overflow-x-auto pb-1 scrollbar-none">
+        <div class="inline-flex p-1 bg-zinc-100 dark:bg-zinc-900/90 border border-zinc-200 dark:border-zinc-800 rounded-xl min-w-max gap-1">
+            <button type="button" onclick="filterCategory('all', this)" class="category-pill active-pill px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-sm font-semibold">
+                <span class="text-xs">⚡</span>
                 <span>Semua Layanan</span>
             </button>
             @foreach($categories as $cat)
-                <button type="button" onclick="filterCategory('{{ $cat->slug }}', this)" class="category-pill px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl sm:rounded-2xl text-xs font-bold text-gray-300 hover:text-white bg-slate-900/80 hover:bg-slate-800 border border-slate-800 transition-all flex items-center gap-2">
-                    <span>{{ $cat->icon_display }}</span>
+                <button type="button" onclick="filterCategory('{{ $cat->slug }}', this)" class="category-pill px-3 py-1.5 rounded-lg text-xs font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-all flex items-center gap-1.5">
+                    <span class="text-xs">{{ $cat->icon_display }}</span>
                     <span>{{ $cat->name }}</span>
                     @if($cat->products_count ?? $cat->products->count())
-                        <span class="px-1.5 py-0.2 rounded-full bg-slate-800 text-[10px] text-gray-400">{{ $cat->products_count ?? $cat->products->count() }}</span>
+                        <span class="px-1.5 py-0.2 rounded text-[10px] font-mono bg-zinc-200 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400">{{ $cat->products_count ?? $cat->products->count() }}</span>
                     @endif
                 </button>
             @endforeach
         </div>
     </div>
 
-    <!-- 4. PRODUCT CATALOG GRID (Clean & Sleek Modern Cards) -->
-    <div id="catalog-section" class="scroll-mt-24 mb-16">
+    <!-- 4. PRODUCT CATALOG GRID (Linear Precision Cards) -->
+    <div id="catalog-section" class="scroll-mt-20 mb-12">
         @forelse($categories as $category)
             @php
                 $catType = $category->type ?? 'general';
-                $accentColor = match($catType) {
-                    'game' => 'cyan',
-                    'game_account' => 'amber',
-                    'preorder' => 'fuchsia',
-                    'joki' => 'emerald',
-                    'account' => 'indigo',
-                    default => 'pink',
-                };
             @endphp
-            <div class="product-group-section mb-12" id="group-{{ $category->slug }}" data-category="{{ $category->slug }}">
+            <div class="product-group-section mb-10" id="group-{{ $category->slug }}" data-category="{{ $category->slug }}">
                 <!-- Category Section Header -->
-                <div class="flex items-center justify-between mb-5">
+                <div class="flex items-center justify-between mb-4 pb-2 border-b border-zinc-100 dark:border-zinc-800/80">
                     <div>
-                        <h3 class="text-xl sm:text-2xl font-black text-white flex items-center gap-2.5 tracking-tight">
-                            <span class="w-8 h-8 rounded-xl bg-{{ $accentColor }}-500/15 text-{{ $accentColor }}-400 flex items-center justify-center text-sm border border-{{ $accentColor }}-500/30">
-                                {{ $category->icon_display }}
-                            </span>
+                        <h3 class="text-base sm:text-lg font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-2 tracking-tight">
+                            <span>{{ $category->icon_display }}</span>
                             <span>{{ $category->name }}{{ $catType === 'game_account' && !str_contains(strtolower($category->name), 'bergaransi') ? ' Bergaransi' : '' }}{{ $catType === 'game' && !str_contains(strtolower($category->name), 'favorit') ? ' Favorit' : '' }}</span>
                         </h3>
-                        <p class="text-xs text-gray-400 mt-1">
+                        <p class="text-[11px] text-zinc-500 dark:text-zinc-400 mt-0.5">
                             @if($catType === 'game')
-                                Isi diamond &amp; koin game instan cukup masukkan User ID tanpa antre!
+                                Isi diamond game instan cukup masukkan User ID &amp; Server Zone.
                             @elseif($catType === 'game_account')
-                                Akun game sultan &amp; smurf bergaransi anti hackback dengan kredensial langsung.
+                                Akun game sultan &amp; smurf bergaransi resmi anti-hackback.
                             @elseif($catType === 'preorder')
-                                Preorder PDH, Kemeja &amp; Seragam Organisasi custom ukuran S–3XL dengan opsi DP &amp; Lunas.
+                                Preorder PDH &amp; Seragam Organisasi custom ukuran S–3XL.
                             @elseif($catType === 'joki')
-                                Dikerjakan booster pro player berpengalaman, aman anti banned.
+                                Joki rank dikerjakan booster pro player berpengalaman.
                             @elseif($catType === 'account')
-                                Layanan akun digital &amp; streaming dengan durasi fleksibel dan kredensial otomatis.
+                                Akun streaming &amp; langganan digital siap pakai.
                             @else
-                                Pilihan produk dan layanan {{ $category->name }} terbaik siap dipesan.
+                                Produk {{ $category->name }} berkualitas siap dipesan.
                             @endif
                         </p>
                     </div>
-                    <span class="text-xs font-bold text-{{ $accentColor }}-300 bg-{{ $accentColor }}-950/40 px-3 py-1 rounded-xl border border-{{ $accentColor }}-500/30 hidden sm:inline-block">
+                    <span class="text-[10px] font-mono uppercase tracking-wider text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-900 px-2.5 py-1 rounded border border-zinc-200 dark:border-zinc-800 hidden sm:inline-block">
                         {{ $category->type_label }}
                     </span>
                 </div>
@@ -177,34 +166,34 @@
                 <!-- Products Grid -->
                 @if($category->products->isNotEmpty())
                     @if($catType === 'game_account')
-                        <!-- Jual Beli Akun Grid (16:9 Aspect Cards with Specs) -->
-                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                        <!-- Game Account Grid (16:9 Aspect Cards) -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                             @foreach($category->products as $product)
                                 @php
                                     $thumb = $product->getThumbnailUrl();
                                     $specs = $product->account_specs ?? [];
                                 @endphp
-                                <a href="{{ route('products.checkout', $product->slug) }}" class="product-game-card group glass-card rounded-3xl p-5 border border-slate-800 hover:border-amber-500/50 hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between shadow-lg" data-category="{{ $category->slug }}" data-title="{{ $product->name }}" data-publisher="{{ $product->publisher }}">
+                                <a href="{{ route('products.checkout', $product->slug) }}" class="product-game-card group rounded-xl p-4 border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/90 hover:border-zinc-400 dark:hover:border-zinc-700 transition-all flex flex-col justify-between shadow-sm" data-category="{{ $category->slug }}" data-title="{{ $product->name }}" data-publisher="{{ $product->publisher }}">
                                     <div>
-                                        <div class="w-full aspect-[16/9] rounded-2xl bg-slate-950 border border-slate-800 overflow-hidden relative mb-4">
+                                        <div class="w-full aspect-[16/9] rounded-lg bg-zinc-100 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 overflow-hidden relative mb-3">
                                             @if($thumb)
                                                 <img src="{{ $thumb }}" alt="{{ $product->name }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
                                             @else
-                                                <div class="w-full h-full flex items-center justify-center text-5xl">👑</div>
+                                                <div class="w-full h-full flex items-center justify-center text-4xl">👑</div>
                                             @endif
-                                            <span class="absolute top-2.5 left-2.5 text-[10px] font-black px-2.5 py-0.5 rounded-full bg-slate-950/90 text-amber-300 border border-amber-500/40 backdrop-blur-md">
+                                            <span class="absolute top-2 left-2 text-[9px] font-mono font-bold px-2 py-0.5 rounded bg-zinc-950/80 text-zinc-300 border border-zinc-700 backdrop-blur-sm">
                                                 🛡️ Full Garansi
                                             </span>
                                         </div>
 
-                                        <h4 class="font-black text-sm sm:text-base text-white group-hover:text-amber-300 transition-colors line-clamp-1">
+                                        <h4 class="font-bold text-xs sm:text-sm text-zinc-900 dark:text-zinc-100 group-hover:text-zinc-600 dark:group-hover:text-white transition-colors line-clamp-1">
                                             {{ $product->name }}
                                         </h4>
 
                                         @if(!empty($specs))
-                                            <div class="mt-3 flex flex-wrap gap-1.5">
+                                            <div class="mt-2.5 flex flex-wrap gap-1">
                                                 @foreach(array_slice($specs, 0, 3) as $k => $v)
-                                                    <span class="text-[10px] px-2 py-0.5 rounded-lg bg-slate-900 border border-slate-800 text-gray-300">
+                                                    <span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700/80 text-zinc-600 dark:text-zinc-300">
                                                         <strong>{{ $k }}:</strong> {{ $v }}
                                                     </span>
                                                 @endforeach
@@ -212,15 +201,15 @@
                                         @endif
                                     </div>
 
-                                    <div class="mt-5 pt-3 border-t border-slate-800 flex items-center justify-between">
+                                    <div class="mt-4 pt-2.5 border-t border-zinc-100 dark:border-zinc-800 flex items-center justify-between">
                                         <div>
-                                            <span class="text-[10px] text-gray-400 block font-semibold uppercase">Harga Akun</span>
-                                            <span class="text-base font-black text-amber-300 font-mono">
+                                            <span class="text-[9px] text-zinc-500 uppercase tracking-wider block font-mono">Harga Akun</span>
+                                            <span class="text-xs sm:text-sm font-bold text-zinc-900 dark:text-zinc-100 font-mono tabular-nums">
                                                 Rp {{ number_format($product->variants->min('price') ?? 0, 0, ',', '.') }}
                                             </span>
                                         </div>
-                                        <span class="px-3.5 py-1.5 rounded-xl bg-amber-500/15 group-hover:bg-amber-400 text-amber-300 group-hover:text-slate-950 font-black text-xs transition-colors flex items-center gap-1">
-                                            Beli Akun →
+                                        <span class="px-2.5 py-1 rounded bg-zinc-100 dark:bg-zinc-800 group-hover:bg-zinc-900 group-hover:text-white dark:group-hover:bg-zinc-100 dark:group-hover:text-zinc-950 text-zinc-700 dark:text-zinc-300 font-mono text-[11px] font-semibold transition-colors flex items-center gap-1">
+                                            Beli →
                                         </span>
                                     </div>
                                 </a>
@@ -228,8 +217,8 @@
                         </div>
 
                     @elseif($catType === 'preorder')
-                        <!-- Preorder PDH & Uniform Grid -->
-                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                        <!-- Preorder Grid -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                             @foreach($category->products as $product)
                                 @php
                                     $thumb = $product->getThumbnailUrl();
@@ -238,49 +227,49 @@
                                     $hasLunas = $product->variants->contains(fn($v) => str_contains(strtolower($v->name), 'lunas'));
                                     $minPrice = $product->variants->min('price') ?? 0;
                                 @endphp
-                                <a href="{{ route('products.checkout', $product->slug) }}" class="product-game-card group glass-card rounded-3xl p-5 border border-slate-800 hover:border-fuchsia-500/50 hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between shadow-lg" data-category="{{ $category->slug }}" data-title="{{ $product->name }}" data-publisher="{{ $product->publisher }}">
+                                <a href="{{ route('products.checkout', $product->slug) }}" class="product-game-card group rounded-xl p-4 border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/90 hover:border-zinc-400 dark:hover:border-zinc-700 transition-all flex flex-col justify-between shadow-sm" data-category="{{ $category->slug }}" data-title="{{ $product->name }}" data-publisher="{{ $product->publisher }}">
                                     <div>
-                                        <div class="w-full aspect-[16/9] rounded-2xl bg-slate-950 border border-slate-800 overflow-hidden relative mb-4">
+                                        <div class="w-full aspect-[16/9] rounded-lg bg-zinc-100 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 overflow-hidden relative mb-3">
                                             @if($thumb)
                                                 <img src="{{ $thumb }}" alt="{{ $product->name }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
                                             @else
-                                                <div class="w-full h-full flex items-center justify-center text-5xl">👕</div>
+                                                <div class="w-full h-full flex items-center justify-center text-4xl">👕</div>
                                             @endif
-                                            <span class="absolute top-2.5 left-2.5 text-[10px] font-black px-2.5 py-0.5 rounded-full bg-slate-950/90 text-fuchsia-300 border border-fuchsia-500/40 backdrop-blur-md">
-                                                👕 Preorder Open
+                                            <span class="absolute top-2 left-2 text-[9px] font-mono font-bold px-2 py-0.5 rounded bg-zinc-950/80 text-zinc-300 border border-zinc-700 backdrop-blur-sm">
+                                                PREORDER
                                             </span>
                                             @if($hasDp && $hasLunas)
-                                                <span class="absolute top-2.5 right-2.5 text-[9px] font-black px-2 py-0.5 rounded-full bg-emerald-400 text-slate-950 backdrop-blur-md">
-                                                    DP &amp; Lunas
+                                                <span class="absolute top-2 right-2 text-[8px] font-mono font-bold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                                                    DP / LUNAS
                                                 </span>
                                             @endif
                                         </div>
 
-                                        <h4 class="font-black text-sm sm:text-base text-white group-hover:text-fuchsia-300 transition-colors line-clamp-1">
+                                        <h4 class="font-bold text-xs sm:text-sm text-zinc-900 dark:text-zinc-100 group-hover:text-zinc-600 dark:group-hover:text-white transition-colors line-clamp-1">
                                             {{ $product->name }}
                                         </h4>
-                                        <p class="text-xs text-gray-400 mt-0.5 line-clamp-1">{{ $product->publisher ?? 'Konveksi solustion411' }}</p>
+                                        <p class="text-[11px] text-zinc-500 mt-0.5 line-clamp-1">{{ $product->publisher ?? 'Konveksi solustion411' }}</p>
 
                                         @if(!empty($specs))
-                                            <div class="mt-3 flex flex-wrap gap-1.5">
+                                            <div class="mt-2.5 flex flex-wrap gap-1">
                                                 @foreach(array_slice($specs, 0, 3) as $k => $v)
-                                                    <span class="text-[10px] px-2 py-0.5 rounded-lg bg-slate-900 border border-slate-800 text-gray-300">
-                                                        <strong class="text-fuchsia-400">{{ $k }}:</strong> {{ $v }}
+                                                    <span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700/80 text-zinc-600 dark:text-zinc-300">
+                                                        <strong>{{ $k }}:</strong> {{ $v }}
                                                     </span>
                                                 @endforeach
                                             </div>
                                         @endif
                                     </div>
 
-                                    <div class="mt-5 pt-3 border-t border-slate-800 flex items-center justify-between">
+                                    <div class="mt-4 pt-2.5 border-t border-zinc-100 dark:border-zinc-800 flex items-center justify-between">
                                         <div>
-                                            <span class="text-[10px] text-gray-400 block font-semibold uppercase">Mulai Dari (DP/Full)</span>
-                                            <span class="text-base font-black text-fuchsia-400 font-mono">
+                                            <span class="text-[9px] text-zinc-500 uppercase tracking-wider block font-mono">Mulai Dari</span>
+                                            <span class="text-xs sm:text-sm font-bold text-zinc-900 dark:text-zinc-100 font-mono tabular-nums">
                                                 Rp {{ number_format($minPrice, 0, ',', '.') }}
                                             </span>
                                         </div>
-                                        <span class="px-3.5 py-1.5 rounded-xl bg-fuchsia-500/15 group-hover:bg-fuchsia-500 text-fuchsia-300 group-hover:text-white font-black text-xs transition-colors flex items-center gap-1 shadow-sm">
-                                            Preorder Sekarang →
+                                        <span class="px-2.5 py-1 rounded bg-zinc-100 dark:bg-zinc-800 group-hover:bg-zinc-900 group-hover:text-white dark:group-hover:bg-zinc-100 dark:group-hover:text-zinc-950 text-zinc-700 dark:text-zinc-300 font-mono text-[11px] font-semibold transition-colors flex items-center gap-1">
+                                            Preorder →
                                         </span>
                                     </div>
                                 </a>
@@ -289,32 +278,32 @@
 
                     @elseif($catType === 'joki')
                         <!-- Jasa Joki Grid -->
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             @foreach($category->products as $product)
-                                <a href="{{ route('products.checkout', $product->slug) }}" class="product-game-card group glass-card rounded-3xl p-5 border border-slate-800 hover:border-emerald-500/50 hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between shadow-lg" data-category="{{ $category->slug }}" data-title="{{ $product->name }}" data-publisher="{{ $product->publisher }}">
-                                    <div class="flex items-start gap-4">
-                                        <div class="w-14 h-14 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-3xl flex-shrink-0">
+                                <a href="{{ route('products.checkout', $product->slug) }}" class="product-game-card group rounded-xl p-4 border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/90 hover:border-zinc-400 dark:hover:border-zinc-700 transition-all flex flex-col justify-between shadow-sm" data-category="{{ $category->slug }}" data-title="{{ $product->name }}" data-publisher="{{ $product->publisher }}">
+                                    <div class="flex items-start gap-3">
+                                        <div class="w-10 h-10 rounded-lg bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 flex items-center justify-center text-xl flex-shrink-0">
                                             ⚔️
                                         </div>
                                         <div>
-                                            <span class="px-2 py-0.5 rounded-md text-[9px] font-black uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                                            <span class="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold uppercase bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700">
                                                 PRO BOOSTER
                                             </span>
-                                            <h4 class="font-black text-base text-white group-hover:text-emerald-300 transition-colors mt-1">
+                                            <h4 class="font-bold text-xs sm:text-sm text-zinc-900 dark:text-zinc-100 group-hover:text-zinc-600 dark:group-hover:text-white transition-colors mt-1">
                                                 {{ $product->name }}
                                             </h4>
-                                            <p class="text-xs text-gray-400 mt-1 line-clamp-2">{{ $product->description }}</p>
+                                            <p class="text-[11px] text-zinc-500 mt-0.5 line-clamp-2">{{ $product->description }}</p>
                                         </div>
                                     </div>
 
-                                    <div class="mt-5 pt-3 border-t border-slate-800 flex items-center justify-between">
+                                    <div class="mt-4 pt-2.5 border-t border-zinc-100 dark:border-zinc-800 flex items-center justify-between">
                                         <div>
-                                            <span class="text-[10px] text-gray-400 block uppercase font-semibold">Mulai Dari</span>
-                                            <span class="text-sm font-black text-emerald-400 font-mono">
+                                            <span class="text-[9px] text-zinc-500 uppercase tracking-wider block font-mono">Mulai Dari</span>
+                                            <span class="text-xs sm:text-sm font-bold text-zinc-900 dark:text-zinc-100 font-mono tabular-nums">
                                                 Rp {{ number_format($product->variants->min('price') ?? 0, 0, ',', '.') }}
                                             </span>
                                         </div>
-                                        <span class="px-3.5 py-1.5 rounded-xl bg-emerald-500/15 group-hover:bg-emerald-500 text-emerald-300 group-hover:text-slate-950 font-black text-xs transition-colors flex items-center gap-1">
+                                        <span class="px-2.5 py-1 rounded bg-zinc-100 dark:bg-zinc-800 group-hover:bg-zinc-900 group-hover:text-white dark:group-hover:bg-zinc-100 dark:group-hover:text-zinc-950 text-zinc-700 dark:text-zinc-300 font-mono text-[11px] font-semibold transition-colors flex items-center gap-1">
                                             Pesan Joki →
                                         </span>
                                     </div>
@@ -323,33 +312,31 @@
                         </div>
 
                     @elseif($catType === 'account')
-                        <!-- Akun Premium / Streaming Grid -->
-                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-5">
+                        <!-- Akun Premium & Streaming Grid -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                             @foreach($category->products as $product)
-                                <a href="{{ route('products.checkout', $product->slug) }}" class="product-game-card group glass-card rounded-3xl p-5 border border-slate-800 hover:border-indigo-500/50 hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between shadow-lg" data-category="{{ $category->slug }}" data-title="{{ $product->name }}" data-publisher="{{ $product->publisher }}">
+                                <a href="{{ route('products.checkout', $product->slug) }}" class="product-game-card group rounded-xl p-4 border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/90 hover:border-zinc-400 dark:hover:border-zinc-700 transition-all flex flex-col justify-between shadow-sm" data-category="{{ $category->slug }}" data-title="{{ $product->name }}" data-publisher="{{ $product->publisher }}">
                                     <div>
-                                        <div class="flex items-center justify-between gap-3 mb-3.5">
-                                            <div class="flex items-center gap-3">
-                                                <div class="w-12 h-12 rounded-2xl bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center text-2xl flex-shrink-0 shadow-sm group-hover:scale-105 transition-transform">
-                                                    🍿
-                                                </div>
-                                                <div>
-                                                    <span class="text-[9px] font-black uppercase px-2 py-0.5 rounded-md bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
-                                                        {{ $product->publisher ?? 'Akun Digital' }}
-                                                    </span>
-                                                    <h4 class="font-black text-sm sm:text-base text-white group-hover:text-indigo-300 transition-colors line-clamp-1 mt-1">
-                                                        {{ $product->name }}
-                                                    </h4>
-                                                </div>
+                                        <div class="flex items-center gap-2.5 mb-2.5">
+                                            <div class="w-9 h-9 rounded-lg bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 flex items-center justify-center text-lg flex-shrink-0">
+                                                🍿
+                                            </div>
+                                            <div>
+                                                <span class="text-[9px] font-mono uppercase text-zinc-500">
+                                                    {{ $product->publisher ?? 'Digital Service' }}
+                                                </span>
+                                                <h4 class="font-bold text-xs sm:text-sm text-zinc-900 dark:text-zinc-100 group-hover:text-zinc-600 dark:group-hover:text-white transition-colors line-clamp-1">
+                                                    {{ $product->name }}
+                                                </h4>
                                             </div>
                                         </div>
 
                                         @if($product->variants->isNotEmpty())
-                                            <div class="mt-3 pt-3 border-t border-slate-800/80">
-                                                <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider block mb-1.5">Pilihan Durasi / Variasi:</span>
-                                                <div class="flex flex-wrap gap-1.5">
+                                            <div class="mt-2 pt-2 border-t border-zinc-100 dark:border-zinc-800/80">
+                                                <span class="text-[9px] font-mono text-zinc-500 uppercase tracking-wider block mb-1">Pilihan Durasi:</span>
+                                                <div class="flex flex-wrap gap-1">
                                                     @foreach($product->variants as $v)
-                                                        <span class="text-[10px] font-semibold px-2 py-0.5 rounded-lg bg-slate-900 border border-slate-800 text-indigo-300 group-hover:border-indigo-500/30 transition-colors">
+                                                        <span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700/80 text-zinc-700 dark:text-zinc-300">
                                                             ⏱️ {{ Str::limit(str_replace(['- 1 Profil (Sharing)', '- Akun Private (5 Profil)', ' - Sharing', ' - Private'], '', $v->name), 14) }}
                                                         </span>
                                                     @endforeach
@@ -358,14 +345,14 @@
                                         @endif
                                     </div>
 
-                                    <div class="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between">
+                                    <div class="mt-3.5 pt-2.5 border-t border-zinc-100 dark:border-zinc-800 flex items-center justify-between">
                                         <div>
-                                            <span class="text-[9px] text-gray-400 block uppercase font-semibold">Mulai Dari</span>
-                                            <span class="text-sm font-black text-indigo-300 font-mono">
+                                            <span class="text-[9px] text-zinc-500 uppercase tracking-wider block font-mono">Mulai Dari</span>
+                                            <span class="text-xs sm:text-sm font-bold text-zinc-900 dark:text-zinc-100 font-mono tabular-nums">
                                                 Rp {{ number_format($product->variants->min('price') ?? 0, 0, ',', '.') }}
                                             </span>
                                         </div>
-                                        <span class="px-3.5 py-1.5 rounded-xl bg-indigo-500/15 group-hover:bg-indigo-500 text-indigo-300 group-hover:text-white font-black text-xs transition-colors flex items-center gap-1">
+                                        <span class="px-2.5 py-1 rounded bg-zinc-100 dark:bg-zinc-800 group-hover:bg-zinc-900 group-hover:text-white dark:group-hover:bg-zinc-100 dark:group-hover:text-zinc-950 text-zinc-700 dark:text-zinc-300 font-mono text-[11px] font-semibold transition-colors flex items-center gap-1">
                                             Pilih Paket →
                                         </span>
                                     </div>
@@ -374,38 +361,38 @@
                         </div>
 
                     @else
-                        <!-- Top-Up Game / Universal Products Grid (Default) -->
-                        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-5">
+                        <!-- Top Up Games & General Grid -->
+                        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
                             @foreach($category->products as $product)
-                                <a href="{{ route('products.checkout', $product->slug) }}" class="product-game-card group glass-card rounded-2xl p-3.5 border border-slate-800 hover:border-{{ $accentColor }}-500/50 hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between shadow-lg" data-category="{{ $category->slug }}" data-title="{{ $product->name }}" data-publisher="{{ $product->publisher }}">
+                                <a href="{{ route('products.checkout', $product->slug) }}" class="product-game-card group rounded-xl p-3 border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/90 hover:border-zinc-400 dark:hover:border-zinc-700 transition-all flex flex-col justify-between shadow-sm" data-category="{{ $category->slug }}" data-title="{{ $product->name }}" data-publisher="{{ $product->publisher }}">
                                     <div>
-                                        <div class="w-full aspect-[4/3] rounded-xl bg-gradient-to-tr from-slate-900 to-indigo-950 flex flex-col items-center justify-center border border-slate-800/80 mb-3 group-hover:border-{{ $accentColor }}-500/40 transition-all overflow-hidden relative shadow-md">
+                                        <div class="w-full aspect-[4/3] rounded-lg bg-zinc-100 dark:bg-zinc-950 flex flex-col items-center justify-center border border-zinc-200 dark:border-zinc-800 mb-2.5 overflow-hidden relative">
                                             @if($product->getThumbnailUrl())
                                                 <img src="{{ $product->getThumbnailUrl() }}" alt="{{ $product->name }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
                                             @else
-                                                <div class="text-4xl group-hover:scale-110 transition-transform">{{ $category->icon_display }}</div>
-                                                <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider mt-1">{{ $product->publisher ?? $category->name }}</span>
+                                                <div class="text-3xl">{{ $category->icon_display }}</div>
+                                                <span class="text-[9px] font-mono text-zinc-500 uppercase tracking-wider mt-1">{{ $product->publisher ?? $category->name }}</span>
                                             @endif
                                             
-                                            <span class="absolute top-2 right-2 text-[8px] font-black px-2 py-0.5 rounded-full bg-{{ $accentColor }}-500/90 text-slate-950 backdrop-blur-md shadow-sm">
-                                                ⚡ 1-3 DETIK
+                                            <span class="absolute top-1.5 right-1.5 text-[8px] font-mono font-bold px-1.5 py-0.2 rounded bg-zinc-950/80 text-zinc-300 border border-zinc-700 backdrop-blur-sm">
+                                                1-3 DETIK
                                             </span>
                                         </div>
 
-                                        <h4 class="font-black text-xs sm:text-sm text-white group-hover:text-{{ $accentColor }}-300 transition-colors line-clamp-1">
+                                        <h4 class="font-bold text-xs text-zinc-900 dark:text-zinc-100 group-hover:text-zinc-600 dark:group-hover:text-white transition-colors line-clamp-1">
                                             {{ $product->name }}
                                         </h4>
-                                        <p class="text-[10px] text-gray-400 mt-0.5">{{ $product->publisher ?? $category->name }}</p>
+                                        <p class="text-[10px] text-zinc-500 mt-0.5">{{ $product->publisher ?? $category->name }}</p>
                                     </div>
 
-                                    <div class="mt-4 pt-2.5 border-t border-slate-800/80 flex items-center justify-between">
+                                    <div class="mt-3 pt-2 border-t border-zinc-100 dark:border-zinc-800/80 flex items-center justify-between">
                                         <div>
-                                            <span class="text-[9px] text-gray-400 block uppercase font-semibold">Mulai</span>
-                                            <span class="text-xs font-black text-{{ $accentColor }}-400 font-mono">
+                                            <span class="text-[8px] font-mono text-zinc-500 uppercase tracking-wider block">Mulai</span>
+                                            <span class="text-xs font-bold text-zinc-900 dark:text-zinc-100 font-mono tabular-nums">
                                                 Rp {{ number_format($product->variants->min('price') ?? 0, 0, ',', '.') }}
                                             </span>
                                         </div>
-                                        <span class="w-7 h-7 rounded-lg bg-slate-800 group-hover:bg-{{ $accentColor }}-500 text-gray-300 group-hover:text-slate-950 flex items-center justify-center text-xs font-bold transition-colors">
+                                        <span class="w-6 h-6 rounded bg-zinc-100 dark:bg-zinc-800 group-hover:bg-zinc-900 group-hover:text-white dark:group-hover:bg-zinc-100 dark:group-hover:text-zinc-950 text-zinc-600 dark:text-zinc-300 flex items-center justify-center font-mono text-xs transition-colors">
                                             →
                                         </span>
                                     </div>
@@ -414,65 +401,62 @@
                         </div>
                     @endif
                 @else
-                    <!-- Empty State for this Category -->
-                    <div class="p-8 rounded-3xl glass-card border border-slate-800/80 text-center flex flex-col items-center justify-center">
-                        <div class="w-12 h-12 rounded-2xl bg-{{ $accentColor }}-500/10 border border-{{ $accentColor }}-500/20 flex items-center justify-center text-2xl mb-2 text-{{ $accentColor }}-400">
-                            {{ $category->icon_display }}
-                        </div>
-                        <p class="text-xs text-gray-300 font-bold">Belum ada produk aktif di kategori {{ $category->name }}.</p>
-                        <p class="text-[11px] text-gray-500 mt-0.5">Admin dapat menambahkan produk baru melalui panel dashboard.</p>
+                    <div class="p-6 rounded-xl bg-white dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 text-center font-mono text-xs text-zinc-500">
+                        Belum ada produk aktif di kategori {{ $category->name }}.
                     </div>
                 @endif
             </div>
         @empty
-            <!-- State when No Active Categories Exist -->
-            <div class="p-12 rounded-3xl glass-card border border-slate-800 text-center flex flex-col items-center justify-center">
-                <div class="w-14 h-14 rounded-2xl bg-pink-500/10 border border-pink-500/20 flex items-center justify-center text-3xl mb-3 text-pink-400">📁</div>
-                <h3 class="text-base font-bold text-white">Belum Ada Kategori Layanan Aktif</h3>
-                <p class="text-xs text-gray-400 mt-1 max-w-md">Admin dapat mengaktifkan atau menambahkan kategori baru melalui panel dashboard untuk menampilkan produk.</p>
-                @auth
-                    @if(auth()->user()->isAdmin())
-                        <a href="{{ route('admin.categories.index') }}" class="mt-4 px-4 py-2 rounded-xl bg-pink-600 hover:bg-pink-500 text-white text-xs font-bold transition-all">
-                            📁 Kelola Kategori Admin
-                        </a>
-                    @endif
-                @endauth
+            <div class="p-10 rounded-2xl bg-white dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 text-center flex flex-col items-center justify-center">
+                <span class="text-3xl mb-2">📁</span>
+                <h3 class="text-sm font-bold text-zinc-900 dark:text-white font-mono">Belum Ada Kategori Layanan</h3>
+                <p class="text-xs text-zinc-500 mt-0.5">Admin dapat mengaktifkan kategori melalui panel dashboard.</p>
             </div>
         @endforelse
+
+        <!-- Empty Search Notice -->
+        <div id="search-empty-state" class="hidden p-8 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-center flex-col items-center justify-center my-6">
+            <span class="text-3xl mb-2">🔍</span>
+            <h4 class="text-sm font-bold text-zinc-900 dark:text-white font-mono">Produk Tidak Ditemukan</h4>
+            <p class="text-xs text-zinc-500 mt-0.5 max-w-sm">Tidak ada game atau produk yang cocok dengan kata kunci pencarian Anda.</p>
+            <button type="button" onclick="document.getElementById('global-game-search').value = ''; filterGamesSearch('');" class="mt-3 px-3.5 py-1.5 rounded-lg bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-950 font-bold text-xs font-mono transition-all">
+                Reset Pencarian
+            </button>
+        </div>
     </div>
 
-    <!-- 5. KEUNGGULAN LAYANAN (solustion411 Feature Highlights) -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 mt-16 pt-12 border-t border-slate-800">
-        <div class="glass-card p-5 rounded-3xl border border-slate-800 hover:border-cyan-500/30 transition-all flex flex-col items-center sm:items-start text-center sm:text-left">
-            <div class="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 flex items-center justify-center text-2xl mb-3 shadow-sm">
+    <!-- 5. VALUE PROPOSITION HIGHLIGHTS (Linear Grid) -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mt-12 pt-10 border-t border-zinc-200 dark:border-zinc-800/80">
+        <div class="bg-white dark:bg-zinc-900/60 p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-700 transition-all flex flex-col items-start shadow-sm">
+            <div class="w-8 h-8 rounded-lg bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 flex items-center justify-center text-sm mb-2.5">
                 ⚡
             </div>
-            <h4 class="text-sm font-black text-white">Proses Kilat 1-3 Detik</h4>
-            <p class="text-[11px] text-gray-400 mt-1 leading-relaxed">Pengiriman diamond game instan &amp; otomatis 24 jam nonstop.</p>
+            <h4 class="text-xs font-bold text-zinc-900 dark:text-zinc-100 font-mono">Proses 1-3 Detik</h4>
+            <p class="text-[11px] text-zinc-500 mt-0.5">Pengiriman saldo &amp; diamond game instan otomatis 24 jam.</p>
         </div>
 
-        <div class="glass-card p-5 rounded-3xl border border-slate-800 hover:border-amber-500/30 transition-all flex flex-col items-center sm:items-start text-center sm:text-left">
-            <div class="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center text-2xl mb-3 shadow-sm">
+        <div class="bg-white dark:bg-zinc-900/60 p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-700 transition-all flex flex-col items-start shadow-sm">
+            <div class="w-8 h-8 rounded-lg bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 flex items-center justify-center text-sm mb-2.5">
                 🛡️
             </div>
-            <h4 class="text-sm font-black text-white">100% Legal &amp; Bergaransi</h4>
-            <p class="text-[11px] text-gray-400 mt-1 leading-relaxed">Diamond resmi aman dari ban dan akun game monsep anti hackback.</p>
+            <h4 class="text-xs font-bold text-zinc-900 dark:text-zinc-100 font-mono">100% Legal &amp; Garansi</h4>
+            <p class="text-[11px] text-zinc-500 mt-0.5">Semua item game resmi aman dari ban dengan garansi toko.</p>
         </div>
 
-        <div class="glass-card p-5 rounded-3xl border border-slate-800 hover:border-emerald-500/30 transition-all flex flex-col items-center sm:items-start text-center sm:text-left">
-            <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center text-2xl mb-3 shadow-sm">
+        <div class="bg-white dark:bg-zinc-900/60 p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-700 transition-all flex flex-col items-start shadow-sm">
+            <div class="w-8 h-8 rounded-lg bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 flex items-center justify-center text-sm mb-2.5">
                 💳
             </div>
-            <h4 class="text-sm font-black text-white">Metode Bayar Lengkap</h4>
-            <p class="text-[11px] text-gray-400 mt-1 leading-relaxed">QRIS, BCA, Mandiri, BRI, DANA, OVO, ShopeePay hingga Indomaret.</p>
+            <h4 class="text-xs font-bold text-zinc-900 dark:text-zinc-100 font-mono">Pembayaran Lengkap</h4>
+            <p class="text-[11px] text-zinc-500 mt-0.5">Dukungan QRIS instan dan transfer Bank BCA, Mandiri, BRI, BNI.</p>
         </div>
 
-        <a href="https://wa.me/6285150718231?text=Halo%20Admin%20solustion411,%20saya%20butuh%20bantuan%20terkait%20layanan" target="_blank" class="glass-card p-5 rounded-3xl border border-slate-800 hover:border-purple-500/40 hover:-translate-y-1 transition-all flex flex-col items-center sm:items-start text-center sm:text-left group cursor-pointer block">
-            <div class="w-12 h-12 rounded-2xl bg-purple-500/10 border border-purple-500/20 text-purple-400 flex items-center justify-center text-2xl mb-3 shadow-sm group-hover:scale-110 transition-transform">
+        <a href="https://wa.me/6285150718231?text=Halo%20Admin%20solustion411,%20saya%20butuh%20bantuan" target="_blank" class="bg-white dark:bg-zinc-900/60 p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-700 transition-all flex flex-col items-start group shadow-sm block">
+            <div class="w-8 h-8 rounded-lg bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 flex items-center justify-center text-sm mb-2.5 group-hover:scale-105 transition-transform">
                 💬
             </div>
-            <h4 class="text-sm font-black text-white group-hover:text-purple-300 transition-colors">Customer Support 24/7</h4>
-            <p class="text-[11px] text-gray-400 mt-1 leading-relaxed">Bantuan ramah &amp; responsif via WhatsApp: <strong class="text-purple-300 font-mono">0851-5071-8231</strong>.</p>
+            <h4 class="text-xs font-bold text-zinc-900 dark:text-zinc-100 font-mono">Bantuan CS 24 Jam</h4>
+            <p class="text-[11px] text-zinc-500 mt-0.5">Siap membantu via WhatsApp: <strong class="text-zinc-800 dark:text-zinc-200 font-mono">0851-5071-8231</strong>.</p>
         </a>
     </div>
 
@@ -503,11 +487,11 @@
 
         dots.forEach((dot, i) => {
             if (i === currentSlide) {
-                dot.classList.add('bg-cyan-400', 'w-8');
-                dot.classList.remove('bg-slate-700', 'w-2.5');
+                dot.classList.add('bg-zinc-100', 'w-6');
+                dot.classList.remove('bg-zinc-600/70', 'w-1.5');
             } else {
-                dot.classList.remove('bg-cyan-400', 'w-8');
-                dot.classList.add('bg-slate-700', 'w-2.5');
+                dot.classList.remove('bg-zinc-100', 'w-6');
+                dot.classList.add('bg-zinc-600/70', 'w-1.5');
             }
         });
     }
@@ -540,16 +524,15 @@
         }
     }
 
-    // Category Filter Logic
+    // Category Filter Logic (Segmented Control)
     function filterCategory(category, buttonEl) {
-        // Highlight active pill
         document.querySelectorAll('.category-pill').forEach(pill => {
-            pill.classList.remove('active-pill', 'bg-gradient-to-r', 'from-cyan-500', 'to-blue-600', 'text-slate-950', 'shadow-md', 'shadow-cyan-500/20', 'border-cyan-400/40');
-            pill.classList.add('text-gray-300', 'bg-slate-900/80', 'border-slate-800');
+            pill.classList.remove('active-pill', 'bg-white', 'dark:bg-zinc-800', 'text-zinc-900', 'dark:text-white', 'shadow-sm', 'font-semibold');
+            pill.classList.add('text-zinc-600', 'dark:text-zinc-400');
         });
 
-        buttonEl.classList.add('active-pill', 'bg-gradient-to-r', 'from-cyan-500', 'to-blue-600', 'text-slate-950', 'shadow-md', 'shadow-cyan-500/20', 'border-cyan-400/40');
-        buttonEl.classList.remove('text-gray-300', 'bg-slate-900/80', 'border-slate-800');
+        buttonEl.classList.add('active-pill', 'bg-white', 'dark:bg-zinc-800', 'text-zinc-900', 'dark:text-white', 'shadow-sm', 'font-semibold');
+        buttonEl.classList.remove('text-zinc-600', 'dark:text-zinc-400');
 
         // Show/hide sections
         const groups = document.querySelectorAll('.product-group-section');
@@ -593,6 +576,34 @@
         }
         updateFSTimer();
         setInterval(updateFSTimer, 1000);
+    }
+
+    // Live Search Filter for Games
+    function filterGamesSearch(query) {
+        const term = query.toLowerCase().trim();
+        const cards = document.querySelectorAll('.product-game-card');
+        let matchedCount = 0;
+        cards.forEach(card => {
+            const title = card.getAttribute('data-title') || '';
+            const pub = card.getAttribute('data-publisher') || '';
+            if (title.toLowerCase().includes(term) || pub.toLowerCase().includes(term)) {
+                card.style.display = '';
+                matchedCount++;
+            } else {
+                card.style.display = 'none';
+            }
+        });
+
+        const emptyNotice = document.getElementById('search-empty-state');
+        if (emptyNotice) {
+            if (term.length > 0 && matchedCount === 0) {
+                emptyNotice.classList.remove('hidden');
+                emptyNotice.classList.add('flex');
+            } else {
+                emptyNotice.classList.add('hidden');
+                emptyNotice.classList.remove('flex');
+            }
+        }
     }
 </script>
 @endsection

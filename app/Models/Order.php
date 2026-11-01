@@ -137,6 +137,38 @@ class Order extends Model
     }
 
     /**
+     * Check if preorder PDH / Uniform order.
+     */
+    public function isPreorder(): bool
+    {
+        return $this->product_type === ProductType::Preorder;
+    }
+
+    /**
+     * Get clothing size (stored in target_user_id for preorder).
+     */
+    public function getClothingSizeAttribute(): ?string
+    {
+        return $this->isPreorder() ? $this->target_user_id : null;
+    }
+
+    /**
+     * Get sleeve type (stored in target_zone_id for preorder).
+     */
+    public function getSleeveTypeAttribute(): ?string
+    {
+        return $this->isPreorder() ? $this->target_zone_id : null;
+    }
+
+    /**
+     * Get embroidery name (stored in target_nickname for preorder).
+     */
+    public function getEmbroideryNameAttribute(): ?string
+    {
+        return $this->isPreorder() ? $this->target_nickname : null;
+    }
+
+    /**
      * Scope orders by status.
      */
     public function scopeStatus(Builder $query, OrderStatus|string $status): Builder

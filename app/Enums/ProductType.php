@@ -8,6 +8,7 @@ enum ProductType: string
     case Account = 'account';
     case GameAccount = 'game_account';
     case Joki = 'joki';
+    case Preorder = 'preorder';
 
     public function label(): string
     {
@@ -16,6 +17,7 @@ enum ProductType: string
             self::Account => 'Akun Premium',
             self::GameAccount => 'Jual Beli Akun Game',
             self::Joki => 'Jasa Joki Rank',
+            self::Preorder => 'Preorder PDH & Uniform',
         };
     }
 
@@ -26,6 +28,7 @@ enum ProductType: string
             self::Account => 'cyan',
             self::GameAccount => 'amber',
             self::Joki => 'emerald',
+            self::Preorder => 'fuchsia',
         };
     }
 
@@ -36,6 +39,7 @@ enum ProductType: string
             self::Account => '🍿',
             self::GameAccount => '👑',
             self::Joki => '⚔️',
+            self::Preorder => '👕',
         };
     }
 
@@ -47,5 +51,10 @@ enum ProductType: string
     public function isAccountStock(): bool
     {
         return in_array($this, [self::Account, self::GameAccount], true);
+    }
+
+    public function isPreorder(): bool
+    {
+        return $this === self::Preorder;
     }
 }

@@ -69,4 +69,36 @@ class Category extends Model
     {
         return $query->whereNull('parent_id');
     }
+
+    /**
+     * Display icon/emoji for UI rendering.
+     */
+    public function getIconDisplayAttribute(): string
+    {
+        return match ($this->icon) {
+            'gamepad' => '🎮',
+            'tv' => '🍿',
+            'user-check' => '👑',
+            'shield' => '⚔️',
+            'shirt' => '👕',
+            null, '' => '📁',
+            default => $this->icon,
+        };
+    }
+
+    /**
+     * Formatted label for category type.
+     */
+    public function getTypeLabelAttribute(): string
+    {
+        return match ($this->type) {
+            'game' => 'Top-Up Game',
+            'account' => 'Akun Premium / Streaming',
+            'game_account' => 'Jual Beli Akun Game',
+            'joki' => 'Jasa Joki Rank',
+            'preorder' => 'Preorder PDH & Uniform',
+            null, '' => 'Umum',
+            default => ucfirst(str_replace('_', ' ', $this->type)),
+        };
+    }
 }
