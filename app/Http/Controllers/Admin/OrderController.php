@@ -6,6 +6,7 @@ use App\Enums\OrderStatus;
 use App\Enums\PaymentStatus;
 use App\Enums\ProductType;
 use App\Http\Controllers\Controller;
+use App\Mail\PaymentConfirmedMail;
 use App\Models\Order;
 use App\Models\Product;
 use App\Services\Order\OrderService;
@@ -13,6 +14,8 @@ use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -502,7 +505,24 @@ class OrderController extends Controller
                 ]);
             }
 
-            return back()->with('success', "Pembayaran untuk pesanan {$order->order_number} berhasil dikonfirmasi dan pesanan telah selesai!");
+            // Send automatic confirmation email to customer
+            $emailSent = false;
+            if (! empty($order->customer_email)) {
+                try {
+                    $order->loadMissing(['items.product', 'items.variant', 'payment']);
+                    Mail::to($order->customer_email)->send(new PaymentConfirmedMail($order));
+                    $emailSent = true;
+                } catch (\Throwable $mailError) {
+                    Log::error('Gagal mengirim email konfirmasi pesanan: '.$mailError->getMessage());
+                }
+            }
+
+            $successMsg = "Pembayaran untuk pesanan {$order->order_number} berhasil dikonfirmasi dan pesanan telah selesai!";
+            if ($emailSent) {
+                $successMsg .= " Email tanda terima telah dikirimkan ke {$order->customer_email}.";
+            }
+
+            return back()->with('success', $successMsg);
         } catch (Exception $e) {
             return back()->with('error', 'Gagal memproses konfirmasi: '.$e->getMessage());
         }
