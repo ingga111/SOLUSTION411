@@ -43,6 +43,7 @@ class PaymentConfirmedMail extends Mailable
     {
         return new Content(
             view: 'emails.orders.payment-confirmed',
+            text: 'emails.orders.payment-confirmed-text',
         );
     }
 
