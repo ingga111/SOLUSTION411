@@ -93,10 +93,6 @@
     <!-- Advanced Precision Filter Bar -->
     <div class="rounded-xl p-4 bg-zinc-900/70 border border-zinc-800 space-y-3">
         <form method="GET" action="{{ route('admin.orders.index') }}" class="space-y-3">
-            @if(request()->filled('status'))
-                <input type="hidden" name="status" value="{{ request('status') }}">
-            @endif
-
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-2.5">
                 <!-- 1. Search Keyword -->
                 <div class="lg:col-span-2">
@@ -134,16 +130,16 @@
                     </select>
                 </div>
 
-                <!-- 4. Clothing Size Filter (for Preorder) -->
+                <!-- 4. Status Pesanan Filter -->
                 <div>
-                    <label class="block text-[10px] font-mono text-zinc-400 uppercase tracking-wider mb-1">Ukuran (Preorder)</label>
-                    <select name="clothing_size" class="w-full py-1.5 px-2.5 rounded-lg bg-zinc-950 border border-zinc-800 text-xs text-zinc-300 focus:outline-none focus:border-zinc-500 font-mono">
-                        <option value="">Semua Ukuran</option>
-                        @foreach($clothingSizes as $sz)
-                            <option value="{{ $sz }}" {{ request('clothing_size') === $sz ? 'selected' : '' }}>
-                                Size {{ $sz }}
-                            </option>
-                        @endforeach
+                    <label class="block text-[10px] font-mono text-zinc-400 uppercase tracking-wider mb-1">Status Pesanan</label>
+                    <select name="status" class="w-full py-1.5 px-2.5 rounded-lg bg-zinc-950 border border-zinc-800 text-xs text-zinc-300 focus:outline-none focus:border-zinc-500">
+                        <option value="">Semua Status</option>
+                        <option value="completed" {{ request('status') === 'completed' ? 'selected' : '' }}>Selesai / Lunas</option>
+                        <option value="failed" {{ request('status') === 'failed' ? 'selected' : '' }}>Ditolak / Batal / Gagal</option>
+                        <option value="waiting_verification" {{ request('status') === 'waiting_verification' ? 'selected' : '' }}>Perlu Verifikasi</option>
+                        <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>Menunggu Bayar</option>
+                        <option value="processing" {{ request('status') === 'processing' ? 'selected' : '' }}>Sedang Diproses</option>
                     </select>
                 </div>
 
@@ -152,8 +148,8 @@
                     <button type="submit" class="flex-1 py-1.5 px-3 rounded-lg bg-zinc-100 hover:bg-white text-zinc-950 text-xs font-bold transition-all shadow-sm">
                         Filter
                     </button>
-                    @if(request()->anyFilled(['search', 'product_type', 'product_id', 'clothing_size', 'date_from', 'date_to']))
-                        <a href="{{ route('admin.orders.index', request()->filled('status') ? ['status' => request('status')] : []) }}" 
+                    @if(request()->anyFilled(['search', 'status', 'product_type', 'product_id', 'clothing_size', 'date_from', 'date_to']))
+                        <a href="{{ route('admin.orders.index') }}" 
                            class="py-1.5 px-2.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white text-xs font-mono transition-colors" title="Reset Semua Filter">
                             ✕
                         </a>

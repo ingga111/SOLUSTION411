@@ -45,7 +45,9 @@ class OrderController extends Controller
         if ($status === 'waiting_verification') {
             $query->where('status', OrderStatus::Processing)
                 ->whereHas('payment', fn ($q) => $q->whereNotNull('payment_proof')->where('status', '!=', PaymentStatus::Paid));
-        } elseif ($status && in_array($status, ['pending', 'processing', 'completed', 'failed', 'cancelled'], true)) {
+        } elseif ($status === 'failed') {
+            $query->whereIn('status', [OrderStatus::Failed, OrderStatus::Cancelled]);
+        } elseif ($status && in_array($status, ['pending', 'processing', 'completed', 'cancelled'], true)) {
             $query->where('status', $status);
         }
 
