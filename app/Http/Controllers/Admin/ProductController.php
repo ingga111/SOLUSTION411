@@ -11,6 +11,7 @@ use App\Models\ProductVariant;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
@@ -57,8 +58,8 @@ class ProductController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'type' => ['required', Rule::enum(ProductType::class)],
             'publisher' => ['nullable', 'string', 'max:100'],
-            'thumbnail' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:5120'],
-            'gallery.*' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:5120'],
+            'thumbnail' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:10240'],
+            'gallery.*' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:10240'],
             'account_specs_raw' => ['nullable', 'string'],
             'description' => ['nullable', 'string'],
             'instructions' => ['nullable', 'string'],
@@ -77,6 +78,14 @@ class ProductController extends Controller
         ], [
             'name.required' => 'Nama produk wajib diisi.',
             'category_id.required' => 'Pilih kategori produk.',
+            'thumbnail.image' => 'File foto sampul harus berupa gambar valid.',
+            'thumbnail.mimes' => 'Format foto sampul harus JPG, JPEG, PNG, atau WebP.',
+            'thumbnail.max' => 'Ukuran foto sampul tidak boleh lebih dari 10MB.',
+            'thumbnail.uploaded' => 'Foto sampul gagal diunggah karena melebihi batas upload_max_filesize server hosting. Gunakan foto lebih kecil atau naikkan limit di cPanel MultiPHP INI Editor.',
+            'gallery.*.image' => 'File galeri harus berupa gambar valid.',
+            'gallery.*.mimes' => 'Format foto galeri harus JPG, JPEG, PNG, atau WebP.',
+            'gallery.*.max' => 'Ukuran foto galeri tidak boleh lebih dari 10MB.',
+            'gallery.*.uploaded' => 'Foto galeri gagal diunggah karena melebihi batas upload server hosting.',
             'variants.required' => 'Tambahkan minimal satu variasi / nominal harga.',
             'variants.*.name.required' => 'Nama variasi wajib diisi.',
             'variants.*.sku.required' => 'SKU / Kode variasi wajib diisi.',
@@ -85,14 +94,18 @@ class ProductController extends Controller
         ]);
 
         $thumbnailPath = null;
-        if ($request->hasFile('thumbnail')) {
+        if ($request->hasFile('thumbnail') && $request->file('thumbnail')->isValid()) {
+            Storage::disk('public')->makeDirectory('products');
             $thumbnailPath = $request->file('thumbnail')->store('products', 'public');
         }
 
         $galleryPaths = [];
         if ($request->hasFile('gallery')) {
+            Storage::disk('public')->makeDirectory('products');
             foreach ($request->file('gallery') as $photo) {
-                $galleryPaths[] = $photo->store('products', 'public');
+                if ($photo->isValid()) {
+                    $galleryPaths[] = $photo->store('products', 'public');
+                }
             }
         }
 
@@ -198,8 +211,8 @@ class ProductController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'type' => ['required', Rule::enum(ProductType::class)],
             'publisher' => ['nullable', 'string', 'max:100'],
-            'thumbnail' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:5120'],
-            'gallery.*' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:5120'],
+            'thumbnail' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:10240'],
+            'gallery.*' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:10240'],
             'account_specs_raw' => ['nullable', 'string'],
             'description' => ['nullable', 'string'],
             'instructions' => ['nullable', 'string'],
@@ -208,6 +221,17 @@ class ProductController extends Controller
             'requires_zone_id' => ['boolean'],
             'zone_id_label' => ['nullable', 'string', 'max:50'],
             'is_active' => ['boolean'],
+        ], [
+            'name.required' => 'Nama produk wajib diisi.',
+            'category_id.required' => 'Pilih kategori produk.',
+            'thumbnail.image' => 'File foto sampul harus berupa gambar valid.',
+            'thumbnail.mimes' => 'Format foto sampul harus JPG, JPEG, PNG, atau WebP.',
+            'thumbnail.max' => 'Ukuran foto sampul tidak boleh lebih dari 10MB.',
+            'thumbnail.uploaded' => 'Foto sampul gagal diunggah karena melebihi batas upload_max_filesize server hosting. Gunakan foto lebih kecil atau naikkan limit di cPanel MultiPHP INI Editor.',
+            'gallery.*.image' => 'File galeri harus berupa gambar valid.',
+            'gallery.*.mimes' => 'Format foto galeri harus JPG, JPEG, PNG, atau WebP.',
+            'gallery.*.max' => 'Ukuran foto galeri tidak boleh lebih dari 10MB.',
+            'gallery.*.uploaded' => 'Foto galeri gagal diunggah karena melebihi batas upload server hosting.',
         ]);
 
         $updateData = [
@@ -224,14 +248,18 @@ class ProductController extends Controller
             'is_active' => $request->boolean('is_active', true),
         ];
 
-        if ($request->hasFile('thumbnail')) {
+        if ($request->hasFile('thumbnail') && $request->file('thumbnail')->isValid()) {
+            Storage::disk('public')->makeDirectory('products');
             $updateData['thumbnail'] = $request->file('thumbnail')->store('products', 'public');
         }
 
         if ($request->hasFile('gallery')) {
+            Storage::disk('public')->makeDirectory('products');
             $galleryPaths = is_array($product->gallery) ? $product->gallery : [];
             foreach ($request->file('gallery') as $photo) {
-                $galleryPaths[] = $photo->store('products', 'public');
+                if ($photo->isValid()) {
+                    $galleryPaths[] = $photo->store('products', 'public');
+                }
             }
             $updateData['gallery'] = $galleryPaths;
         }

@@ -32,6 +32,22 @@
         
         <!-- Left Column: Form Update Product -->
         <div class="lg:col-span-2 space-y-6">
+            @if ($errors->any())
+                <div class="rounded-xl p-4 bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs space-y-2">
+                    <div class="flex items-center gap-2 font-semibold text-rose-200">
+                        <svg class="w-4 h-4 text-rose-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                        </svg>
+                        <span>Gagal Memperbarui Produk (Terdapat {{ $errors->count() }} Kesalahan):</span>
+                    </div>
+                    <ul class="list-disc list-inside space-y-1 text-zinc-300 pl-1 text-[11px]">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
             <form action="{{ route('admin.products.update', $product->id) }}" method="POST" enctype="multipart/form-data" class="rounded-xl p-5 sm:p-6 bg-zinc-900/60 border border-zinc-800 space-y-4">
                 @csrf
                 @method('PUT')
@@ -90,7 +106,14 @@
                                 <img src="{{ $product->getThumbnailUrl() }}" alt="Current thumbnail" class="w-full h-full object-cover">
                             </div>
                         @endif
-                        <input type="file" name="thumbnail" accept="image/*" class="w-full text-xs text-zinc-400 file:mr-2 file:py-1 file:px-2.5 file:rounded-md file:border-0 file:text-xs file:font-medium file:bg-zinc-800 file:text-zinc-200 hover:file:bg-zinc-700 cursor-pointer bg-zinc-900 border border-zinc-800 rounded-lg py-1 px-2">
+                        <input type="file" name="thumbnail" id="edit_thumbnail_input" accept="image/*" class="w-full text-xs text-zinc-400 file:mr-2 file:py-1 file:px-2.5 file:rounded-md file:border-0 file:text-xs file:font-medium file:bg-zinc-800 file:text-zinc-200 hover:file:bg-zinc-700 cursor-pointer bg-zinc-900 border border-zinc-800 rounded-lg py-1 px-2">
+                        <span class="text-[10px] text-zinc-500 mt-1 block">Format: JPG, PNG, atau WebP (Maksimal 10MB)</span>
+                        @error('thumbnail')
+                            <p class="text-[11px] text-rose-400 mt-1.5 font-medium flex items-center gap-1">
+                                <svg class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                {{ $message }}
+                            </p>
+                        @enderror
                     </div>
 
                     <div>
@@ -105,6 +128,13 @@
                             </div>
                         @endif
                         <input type="file" name="gallery[]" multiple accept="image/*" class="w-full text-xs text-zinc-400 file:mr-2 file:py-1 file:px-2.5 file:rounded-md file:border-0 file:text-xs file:font-medium file:bg-zinc-800 file:text-zinc-200 hover:file:bg-zinc-700 cursor-pointer bg-zinc-900 border border-zinc-800 rounded-lg py-1 px-2">
+                        <span class="text-[10px] text-zinc-500 mt-1 block">Detail foto produk tambahan (Maksimal 10MB per foto).</span>
+                        @error('gallery')
+                            <p class="text-[11px] text-rose-400 mt-1.5 font-medium">{{ $message }}</p>
+                        @enderror
+                        @error('gallery.*')
+                            <p class="text-[11px] text-rose-400 mt-1.5 font-medium">{{ $message }}</p>
+                        @enderror
                     </div>
 
                     @php

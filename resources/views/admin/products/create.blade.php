@@ -22,6 +22,22 @@
         </a>
     </div>
 
+    @if ($errors->any())
+        <div class="rounded-xl p-4 bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs space-y-2">
+            <div class="flex items-center gap-2 font-semibold text-rose-200">
+                <svg class="w-4 h-4 text-rose-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                </svg>
+                <span>Gagal Menyimpan Produk (Terdapat {{ $errors->count() }} Kesalahan):</span>
+            </div>
+            <ul class="list-disc list-inside space-y-1 text-zinc-300 pl-1 text-[11px]">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
     <form action="{{ route('admin.products.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
         @csrf
 
@@ -82,14 +98,34 @@
 
                 <div>
                     <label class="block text-xs font-medium text-zinc-300 mb-1.5">Foto Sampul / Desain Mockup Utama</label>
-                    <input type="file" name="thumbnail" accept="image/*" class="w-full text-xs text-zinc-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-medium file:bg-zinc-800 file:text-zinc-200 hover:file:bg-zinc-700 cursor-pointer bg-zinc-900 border border-zinc-800 rounded-lg py-1 px-2.5">
-                    <span class="text-[10px] text-zinc-500 mt-1 block">Format: JPG, PNG, atau WebP (Maksimal 5MB)</span>
+                    <input type="file" name="thumbnail" id="thumbnail_input" accept="image/*" class="w-full text-xs text-zinc-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-medium file:bg-zinc-800 file:text-zinc-200 hover:file:bg-zinc-700 cursor-pointer bg-zinc-900 border border-zinc-800 rounded-lg py-1 px-2.5">
+                    <div id="thumbnail_preview_wrapper" class="hidden mt-2 flex items-center gap-3 p-2 rounded-lg bg-zinc-950 border border-zinc-800">
+                        <img id="thumbnail_preview_img" src="" alt="Preview" class="w-12 h-12 object-cover rounded border border-zinc-800">
+                        <div class="text-[11px] text-zinc-300 min-w-0">
+                            <span id="thumbnail_name" class="font-medium text-white block truncate"></span>
+                            <span id="thumbnail_size" class="text-zinc-400 text-[10px]"></span>
+                        </div>
+                    </div>
+                    <span class="text-[10px] text-zinc-500 mt-1 block">Format: JPG, PNG, atau WebP (Maksimal 10MB)</span>
+                    @error('thumbnail')
+                        <p class="text-[11px] text-rose-400 mt-1.5 font-medium flex items-center gap-1">
+                            <svg class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            {{ $message }}
+                        </p>
+                    @enderror
                 </div>
 
                 <div>
                     <label class="block text-xs font-medium text-zinc-300 mb-1.5">Galeri Foto Produk (Bisa Banyak Foto)</label>
-                    <input type="file" name="gallery[]" multiple accept="image/*" class="w-full text-xs text-zinc-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-medium file:bg-zinc-800 file:text-zinc-200 hover:file:bg-zinc-700 cursor-pointer bg-zinc-900 border border-zinc-800 rounded-lg py-1 px-2.5">
+                    <input type="file" name="gallery[]" id="gallery_input" multiple accept="image/*" class="w-full text-xs text-zinc-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-medium file:bg-zinc-800 file:text-zinc-200 hover:file:bg-zinc-700 cursor-pointer bg-zinc-900 border border-zinc-800 rounded-lg py-1 px-2.5">
+                    <div id="gallery_preview_wrapper" class="hidden mt-2 flex flex-wrap gap-2"></div>
                     <span class="text-[10px] text-zinc-500 mt-1 block">Detail foto produk tambahan, panduan ukuran cm, atau varian.</span>
+                    @error('gallery')
+                        <p class="text-[11px] text-rose-400 mt-1.5 font-medium">{{ $message }}</p>
+                    @enderror
+                    @error('gallery.*')
+                        <p class="text-[11px] text-rose-400 mt-1.5 font-medium">{{ $message }}</p>
+                    @enderror
                 </div>
 
                 <div class="sm:col-span-2">
@@ -176,29 +212,71 @@
             </div>
 
             <div id="variants-container" class="space-y-3">
-                <div class="variant-row p-4 rounded-lg bg-zinc-900/80 border border-zinc-800 relative">
-                    <div class="grid grid-cols-1 sm:grid-cols-5 gap-3">
-                        <div class="sm:col-span-2">
-                            <label class="block text-[11px] font-medium text-zinc-300 mb-1">Nama Variasi / Nominal <span class="text-rose-400">*</span></label>
-                            <input type="text" name="variants[0][name]" placeholder="Contoh: 86 Diamonds / 1 Bulan" required class="w-full bg-zinc-950 border border-zinc-800 rounded-md px-3 py-1.5 text-xs text-zinc-100 focus:outline-none focus:border-zinc-700">
+                @if(old('variants') && is_array(old('variants')))
+                    @foreach(old('variants') as $idx => $v)
+                        <div class="variant-row p-4 rounded-lg bg-zinc-900/80 border border-zinc-800 relative {{ $loop->first ? '' : 'mt-3' }}">
+                            @if(!$loop->first)
+                                <button type="button" onclick="this.closest('.variant-row').remove()" class="absolute -top-2.5 -right-2.5 w-6 h-6 rounded-full bg-zinc-800 hover:bg-rose-900/80 border border-zinc-700 text-zinc-400 hover:text-rose-300 flex items-center justify-center text-xs transition-colors" title="Hapus baris">
+                                    ✕
+                                </button>
+                            @endif
+                            <div class="grid grid-cols-1 sm:grid-cols-5 gap-3">
+                                <div class="sm:col-span-2">
+                                    <label class="block text-[11px] font-medium text-zinc-300 mb-1">Nama Variasi / Nominal <span class="text-rose-400">*</span></label>
+                                    <input type="text" name="variants[{{ $idx }}][name]" value="{{ $v['name'] ?? '' }}" placeholder="Contoh: 86 Diamonds / 1 Bulan" required class="w-full bg-zinc-950 border border-zinc-800 rounded-md px-3 py-1.5 text-xs text-zinc-100 focus:outline-none focus:border-zinc-700">
+                                    @error("variants.$idx.name")
+                                        <p class="text-[11px] text-rose-400 mt-1">{{ $message }}</p>
+                                    @enderror
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-medium text-zinc-300 mb-1">SKU / Kode <span class="text-rose-400">*</span></label>
+                                    <input type="text" name="variants[{{ $idx }}][sku]" value="{{ $v['sku'] ?? '' }}" placeholder="ML-86" required class="w-full bg-zinc-950 border border-zinc-800 rounded-md px-3 py-1.5 text-xs text-zinc-100 font-mono focus:outline-none focus:border-zinc-700">
+                                    @error("variants.$idx.sku")
+                                        <p class="text-[11px] text-rose-400 mt-1">{{ $message }}</p>
+                                    @enderror
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-medium text-zinc-300 mb-1">Harga Jual (Rp) <span class="text-rose-400">*</span></label>
+                                    <input type="number" name="variants[{{ $idx }}][price]" value="{{ $v['price'] ?? '' }}" placeholder="20000" required class="w-full bg-zinc-950 border border-zinc-800 rounded-md px-3 py-1.5 text-xs text-zinc-100 font-mono tabular-nums focus:outline-none focus:border-zinc-700">
+                                    @error("variants.$idx.price")
+                                        <p class="text-[11px] text-rose-400 mt-1">{{ $message }}</p>
+                                    @enderror
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-medium text-zinc-300 mb-1">Tipe Stok <span class="text-rose-400">*</span></label>
+                                    <select name="variants[{{ $idx }}][stock_type]" class="w-full bg-zinc-950 border border-zinc-800 rounded-md px-3 py-1.5 text-xs text-zinc-100 focus:outline-none focus:border-zinc-700">
+                                        <option value="unlimited" {{ ($v['stock_type'] ?? '') === 'unlimited' ? 'selected' : '' }}>Unlimited (Game)</option>
+                                        <option value="manual" {{ ($v['stock_type'] ?? '') === 'manual' ? 'selected' : '' }}>Terbatas (Akun/Manual)</option>
+                                    </select>
+                                </div>
+                            </div>
                         </div>
-                        <div>
-                            <label class="block text-[11px] font-medium text-zinc-300 mb-1">SKU / Kode <span class="text-rose-400">*</span></label>
-                            <input type="text" name="variants[0][sku]" placeholder="ML-86" required class="w-full bg-zinc-950 border border-zinc-800 rounded-md px-3 py-1.5 text-xs text-zinc-100 font-mono focus:outline-none focus:border-zinc-700">
-                        </div>
-                        <div>
-                            <label class="block text-[11px] font-medium text-zinc-300 mb-1">Harga Jual (Rp) <span class="text-rose-400">*</span></label>
-                            <input type="number" name="variants[0][price]" placeholder="20000" required class="w-full bg-zinc-950 border border-zinc-800 rounded-md px-3 py-1.5 text-xs text-zinc-100 font-mono tabular-nums focus:outline-none focus:border-zinc-700">
-                        </div>
-                        <div>
-                            <label class="block text-[11px] font-medium text-zinc-300 mb-1">Tipe Stok <span class="text-rose-400">*</span></label>
-                            <select name="variants[0][stock_type]" class="w-full bg-zinc-950 border border-zinc-800 rounded-md px-3 py-1.5 text-xs text-zinc-100 focus:outline-none focus:border-zinc-700">
-                                <option value="unlimited" selected>Unlimited (Game)</option>
-                                <option value="manual">Terbatas (Akun/Manual)</option>
-                            </select>
+                    @endforeach
+                @else
+                    <div class="variant-row p-4 rounded-lg bg-zinc-900/80 border border-zinc-800 relative">
+                        <div class="grid grid-cols-1 sm:grid-cols-5 gap-3">
+                            <div class="sm:col-span-2">
+                                <label class="block text-[11px] font-medium text-zinc-300 mb-1">Nama Variasi / Nominal <span class="text-rose-400">*</span></label>
+                                <input type="text" name="variants[0][name]" placeholder="Contoh: 86 Diamonds / 1 Bulan" required class="w-full bg-zinc-950 border border-zinc-800 rounded-md px-3 py-1.5 text-xs text-zinc-100 focus:outline-none focus:border-zinc-700">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-medium text-zinc-300 mb-1">SKU / Kode <span class="text-rose-400">*</span></label>
+                                <input type="text" name="variants[0][sku]" placeholder="ML-86" required class="w-full bg-zinc-950 border border-zinc-800 rounded-md px-3 py-1.5 text-xs text-zinc-100 font-mono focus:outline-none focus:border-zinc-700">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-medium text-zinc-300 mb-1">Harga Jual (Rp) <span class="text-rose-400">*</span></label>
+                                <input type="number" name="variants[0][price]" placeholder="20000" required class="w-full bg-zinc-950 border border-zinc-800 rounded-md px-3 py-1.5 text-xs text-zinc-100 font-mono tabular-nums focus:outline-none focus:border-zinc-700">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-medium text-zinc-300 mb-1">Tipe Stok <span class="text-rose-400">*</span></label>
+                                <select name="variants[0][stock_type]" class="w-full bg-zinc-950 border border-zinc-800 rounded-md px-3 py-1.5 text-xs text-zinc-100 focus:outline-none focus:border-zinc-700">
+                                    <option value="unlimited" selected>Unlimited (Game)</option>
+                                    <option value="manual">Terbatas (Akun/Manual)</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
-                </div>
+                @endif
             </div>
         </div>
 
@@ -216,7 +294,9 @@
 
 @push('scripts')
 <script>
-    let variantIndex = 1;
+    let variantIndex = {{ (old('variants') && is_array(old('variants'))) ? count(old('variants')) : 1 }};
+    const MAX_FILE_SIZE_MB = 10;
+    const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
 
     function addVariantRow(name = '', sku = '', price = '', stockType = 'unlimited', stock = '') {
         const container = document.getElementById('variants-container');
@@ -389,6 +469,63 @@
         if (typeSelect) {
             typeSelect.addEventListener('change', (e) => handleProductTypeChange(e.target.value));
             handleProductTypeChange(typeSelect.value);
+        }
+
+        // Thumbnail Preview & Size Check
+        const thumbInput = document.getElementById('thumbnail_input');
+        const thumbWrapper = document.getElementById('thumbnail_preview_wrapper');
+        const thumbImg = document.getElementById('thumbnail_preview_img');
+        const thumbName = document.getElementById('thumbnail_name');
+        const thumbSize = document.getElementById('thumbnail_size');
+
+        if (thumbInput) {
+            thumbInput.addEventListener('change', function () {
+                const file = this.files && this.files[0];
+                if (file) {
+                    const sizeMb = (file.size / (1024 * 1024)).toFixed(2);
+                    if (file.size > MAX_FILE_SIZE_BYTES) {
+                        alert(`Perhatian: File "${file.name}" berukuran ${sizeMb} MB, melebihi batas 10MB. Foto mungkin ditolak server hosting.`);
+                    }
+                    if (thumbWrapper && thumbImg && thumbName && thumbSize) {
+                        thumbWrapper.classList.remove('hidden');
+                        thumbImg.src = URL.createObjectURL(file);
+                        thumbName.textContent = file.name;
+                        thumbSize.textContent = `${sizeMb} MB ${file.size > MAX_FILE_SIZE_BYTES ? '(Melebihi 10MB!)' : '✓'}`;
+                        thumbSize.className = file.size > MAX_FILE_SIZE_BYTES ? 'text-rose-400 font-semibold text-[10px]' : 'text-emerald-400 text-[10px]';
+                    }
+                } else if (thumbWrapper) {
+                    thumbWrapper.classList.add('hidden');
+                }
+            });
+        }
+
+        // Gallery Preview & Size Check
+        const galleryInput = document.getElementById('gallery_input');
+        const galleryWrapper = document.getElementById('gallery_preview_wrapper');
+
+        if (galleryInput && galleryWrapper) {
+            galleryInput.addEventListener('change', function () {
+                galleryWrapper.innerHTML = '';
+                if (this.files && this.files.length > 0) {
+                    galleryWrapper.classList.remove('hidden');
+                    Array.from(this.files).forEach(file => {
+                        const sizeMb = (file.size / (1024 * 1024)).toFixed(2);
+                        const isOver = file.size > MAX_FILE_SIZE_BYTES;
+                        const item = document.createElement('div');
+                        item.className = 'flex items-center gap-2 p-1.5 rounded bg-zinc-950 border border-zinc-800 text-[10px] text-zinc-300';
+                        item.innerHTML = `
+                            <img src="${URL.createObjectURL(file)}" class="w-8 h-8 object-cover rounded border border-zinc-800">
+                            <div class="truncate max-w-[120px]">
+                                <p class="truncate font-medium text-white">${file.name}</p>
+                                <p class="${isOver ? 'text-rose-400 font-bold' : 'text-zinc-500'}">${sizeMb} MB</p>
+                            </div>
+                        `;
+                        galleryWrapper.appendChild(item);
+                    });
+                } else {
+                    galleryWrapper.classList.add('hidden');
+                }
+            });
         }
     });
 </script>
