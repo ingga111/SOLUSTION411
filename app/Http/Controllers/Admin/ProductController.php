@@ -46,7 +46,7 @@ class ProductController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        if (! $request->filled('type') && $request->filled('category_id')) {
+        if ($request->filled('category_id')) {
             $category = Category::find($request->input('category_id'));
             if ($category && $category->type) {
                 $request->merge(['type' => $category->type]);
@@ -69,7 +69,7 @@ class ProductController extends Controller
             'zone_id_label' => ['nullable', 'string', 'max:50'],
             'variants' => ['required', 'array', 'min:1'],
             'variants.*.name' => ['required', 'string', 'max:255'],
-            'variants.*.sku' => ['required', 'string', 'max:50', 'unique:product_variants,sku'],
+            'variants.*.sku' => ['required', 'string', 'max:50', Rule::unique('product_variants', 'sku')->withoutTrashed()],
             'variants.*.price' => ['required', 'numeric', 'min:0'],
             'variants.*.cost_price' => ['nullable', 'numeric', 'min:0'],
             'variants.*.stock_type' => ['required', 'string', 'in:unlimited,auto_stock,manual'],
@@ -199,7 +199,7 @@ class ProductController extends Controller
      */
     public function update(Request $request, Product $product): RedirectResponse
     {
-        if (! $request->filled('type') && $request->filled('category_id')) {
+        if ($request->filled('category_id')) {
             $category = Category::find($request->input('category_id'));
             if ($category && $category->type) {
                 $request->merge(['type' => $category->type]);
@@ -323,7 +323,7 @@ class ProductController extends Controller
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'sku' => ['required', 'string', 'max:50', 'unique:product_variants,sku'],
+            'sku' => ['required', 'string', 'max:50', Rule::unique('product_variants', 'sku')->withoutTrashed()],
             'price' => ['required', 'numeric', 'min:0'],
             'cost_price' => ['nullable', 'numeric', 'min:0'],
             'stock_type' => ['required', 'string', 'in:unlimited,auto_stock,manual'],

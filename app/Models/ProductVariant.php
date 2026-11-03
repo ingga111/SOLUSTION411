@@ -8,10 +8,32 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Str;
 
 class ProductVariant extends Model
 {
     use HasFactory, SoftDeletes;
+
+    protected static function booted(): void
+    {
+        static::deleting(function (ProductVariant $variant) {
+            if (! str_contains($variant->sku, '-deleted-')) {
+                $variant->sku = $variant->sku.'-deleted-'.time().'-'.Str::random(4);
+                $variant->saveQuietly();
+            }
+        });
+
+        static::restoring(function (ProductVariant $variant) {
+            if (str_contains($variant->sku, '-deleted-')) {
+                $originalSku = preg_replace('/-deleted-\d+-[a-zA-Z0-9]+$/', '', $variant->sku);
+                if (static::where('sku', $originalSku)->whereNull('deleted_at')->exists()) {
+                    $originalSku = $originalSku.'-restored-'.time();
+                }
+                $variant->sku = $originalSku;
+                $variant->saveQuietly();
+            }
+        });
+    }
 
     protected $fillable = [
         'product_id',

@@ -101,11 +101,17 @@
                             </td>
                             <td class="py-2.5 px-3.5 font-mono tabular-nums">
                                 <span class="font-semibold text-xs text-zinc-200">{{ $product->variants->count() }} Paket</span>
-                                @if($product->isAccount() || $product->isGameAccount())
-                                    @php 
-                                        $stockCount = $product->variants->sum('stock');
-                                    @endphp
-                                    <span class="text-[11px] block text-emerald-400/90 font-medium">Stok: {{ $stockCount }}</span>
+                                @php 
+                                    $limitedVariants = $product->variants->where('stock_type', '!=', 'unlimited');
+                                    $hasLimited = $limitedVariants->isNotEmpty() || $product->isAccount() || $product->isGameAccount();
+                                    $stockCount = $limitedVariants->sum('stock');
+                                @endphp
+                                @if($hasLimited)
+                                    @if($stockCount > 0)
+                                        <span class="text-[11px] block text-emerald-400 font-medium">Stok: {{ $stockCount }}</span>
+                                    @else
+                                        <span class="text-[11px] block text-rose-400 font-medium">Stok: 0 (Habis)</span>
+                                    @endif
                                 @endif
                             </td>
                             <td class="py-2.5 px-3.5 whitespace-nowrap">

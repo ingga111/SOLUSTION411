@@ -187,4 +187,57 @@ class AdminProductAndPaymentMethodTest extends TestCase
         $indexResponse->assertStatus(200);
         $this->assertFalse($indexResponse->viewData('products')->pluck('id')->contains($product->id));
     }
+
+    public function test_sku_from_deleted_product_or_variant_can_be_reused(): void
+    {
+        $category = Category::first();
+        $originalSku = 'REUSE-TEST-SKU';
+
+        // 1. Create product with SKU
+        $createResponse = $this->actingAs($this->admin)->post(route('admin.products.store'), [
+            'category_id' => $category->id,
+            'name' => 'Produk Awal',
+            'type' => 'game',
+            'variants' => [
+                [
+                    'name' => 'Paket Awal',
+                    'sku' => $originalSku,
+                    'price' => 50000,
+                    'stock_type' => 'unlimited',
+                ],
+            ],
+        ]);
+        $createResponse->assertRedirect(route('admin.products.index'));
+
+        $product = Product::where('name', 'Produk Awal')->first();
+        $this->assertNotNull($product);
+
+        // 2. Delete the product
+        $deleteResponse = $this->actingAs($this->admin)->delete(route('admin.products.destroy', $product));
+        $deleteResponse->assertRedirect(route('admin.products.index'));
+        $this->assertSoftDeleted('products', ['id' => $product->id]);
+
+        // 3. Reusing the SAME SKU on a new product must SUCCEED without validation or DB constraint error
+        $reuseResponse = $this->actingAs($this->admin)->post(route('admin.products.store'), [
+            'category_id' => $category->id,
+            'name' => 'Produk Baru Reused',
+            'type' => 'game',
+            'variants' => [
+                [
+                    'name' => 'Paket Baru',
+                    'sku' => $originalSku,
+                    'price' => 60000,
+                    'stock_type' => 'unlimited',
+                ],
+            ],
+        ]);
+        $reuseResponse->assertRedirect(route('admin.products.index'));
+        $reuseResponse->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('product_variants', [
+            'sku' => $originalSku,
+            'price' => 60000,
+            'deleted_at' => null,
+        ]);
+    }
 }

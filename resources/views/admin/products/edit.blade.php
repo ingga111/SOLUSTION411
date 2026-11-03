@@ -73,9 +73,9 @@
                                 Kelola Kategori ↗
                             </a>
                         </div>
-                        <select name="category_id" id="edit_category_id" required class="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3.5 py-2 text-xs text-zinc-100 focus:outline-none focus:border-zinc-600 focus:ring-1 focus:ring-zinc-600 transition-colors">
+                        <select name="category_id" id="edit_category_id" onchange="syncEditCategoryType(this)" required class="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3.5 py-2 text-xs text-zinc-100 focus:outline-none focus:border-zinc-600 focus:ring-1 focus:ring-zinc-600 transition-colors">
                             @foreach($categories as $category)
-                                <option value="{{ $category->id }}" data-type="{{ $category->type ?? 'game' }}" {{ $product->category_id == $category->id ? 'selected' : '' }}>
+                                <option value="{{ $category->id }}" data-type="{{ $category->type ?? '' }}" {{ $product->category_id == $category->id ? 'selected' : '' }}>
                                     {{ $category->name }} ({{ ucfirst($category->type ?? 'Umum') }})
                                 </option>
                             @endforeach
@@ -349,17 +349,38 @@
         if (inputStockType) inputStockType.value = 'manual';
     }
 
+    function syncEditCategoryType(selectEl) {
+        const catSelect = selectEl || document.getElementById('edit_category_id');
+        const typeSelect = document.getElementById('edit_product_type');
+        if (!catSelect || !typeSelect) return;
+
+        const selectedOpt = catSelect.options[catSelect.selectedIndex];
+        if (!selectedOpt) return;
+        let detectedType = selectedOpt.getAttribute('data-type');
+        const text = (selectedOpt.text || selectedOpt.innerText || '').toLowerCase();
+        if (!detectedType || detectedType === 'null' || detectedType === '') {
+            if (text.includes('jual') || text.includes('beli') || text.includes('game account')) {
+                detectedType = 'game_account';
+            } else if (text.includes('streaming') || text.includes('netflix') || text.includes('premium')) {
+                detectedType = 'account';
+            } else if (text.includes('joki') || text.includes('rank')) {
+                detectedType = 'joki';
+            } else if (text.includes('pdh') || text.includes('preorder')) {
+                detectedType = 'preorder';
+            } else {
+                detectedType = 'game';
+            }
+        }
+        if (detectedType) {
+            typeSelect.value = detectedType;
+        }
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
         const catSelect = document.getElementById('edit_category_id');
-        const typeSelect = document.getElementById('edit_product_type');
-
-        if (catSelect && typeSelect) {
+        if (catSelect) {
             catSelect.addEventListener('change', function() {
-                const selectedOpt = this.options[this.selectedIndex];
-                const detectedType = selectedOpt.getAttribute('data-type');
-                if (detectedType) {
-                    typeSelect.value = detectedType;
-                }
+                syncEditCategoryType(this);
             });
         }
     });

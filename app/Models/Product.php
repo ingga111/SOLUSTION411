@@ -16,12 +16,16 @@ class Product extends Model
 
     protected static function booted(): void
     {
-        static::deleted(function (Product $product) {
-            $product->variants()->delete();
+        static::deleting(function (Product $product) {
+            foreach ($product->variants as $variant) {
+                $variant->delete();
+            }
         });
 
         static::restored(function (Product $product) {
-            $product->variants()->restore();
+            foreach ($product->variants()->onlyTrashed()->get() as $variant) {
+                $variant->restore();
+            }
         });
     }
 

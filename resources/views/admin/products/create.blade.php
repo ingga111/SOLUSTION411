@@ -69,10 +69,10 @@
                             + Kelola Kategori ↗
                         </a>
                     </div>
-                    <select name="category_id" id="category_select" required class="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3.5 py-2 text-xs text-zinc-100 focus:outline-none focus:border-zinc-600 focus:ring-1 focus:ring-zinc-600 transition-colors">
+                    <select name="category_id" id="category_select" onchange="syncCategoryType(this)" required class="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3.5 py-2 text-xs text-zinc-100 focus:outline-none focus:border-zinc-600 focus:ring-1 focus:ring-zinc-600 transition-colors">
                         <option value="">-- Pilih Kategori --</option>
                         @foreach($categories as $category)
-                            <option value="{{ $category->id }}" data-type="{{ $category->type ?? 'game' }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>
+                            <option value="{{ $category->id }}" data-type="{{ $category->type ?? '' }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>
                                 {{ $category->name }} ({{ ucfirst($category->type ?? 'Umum') }})
                             </option>
                         @endforeach
@@ -81,7 +81,7 @@
 
                 <div>
                     <label class="block text-xs font-medium text-zinc-300 mb-1.5">Tipe Layanan (Otomatis Sinkron)</label>
-                    <select name="type" id="product_type" required class="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3.5 py-2 text-xs text-zinc-100 focus:outline-none focus:border-zinc-600 focus:ring-1 focus:ring-zinc-600 transition-colors">
+                    <select name="type" id="product_type" onchange="handleProductTypeChange(this.value)" required class="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3.5 py-2 text-xs text-zinc-100 focus:outline-none focus:border-zinc-600 focus:ring-1 focus:ring-zinc-600 transition-colors">
                         @foreach($types as $type)
                             <option value="{{ $type->value }}" {{ old('type') == $type->value ? 'selected' : '' }}>
                                 {{ $type->label() }}
@@ -220,59 +220,67 @@
                                     ✕
                                 </button>
                             @endif
-                            <div class="grid grid-cols-1 sm:grid-cols-5 gap-3">
-                                <div class="sm:col-span-2">
+                            <div class="grid grid-cols-1 sm:grid-cols-12 gap-3">
+                                <div class="sm:col-span-4">
                                     <label class="block text-[11px] font-medium text-zinc-300 mb-1">Nama Variasi / Nominal <span class="text-rose-400">*</span></label>
                                     <input type="text" name="variants[{{ $idx }}][name]" value="{{ $v['name'] ?? '' }}" placeholder="Contoh: 86 Diamonds / 1 Bulan" required class="w-full bg-zinc-950 border border-zinc-800 rounded-md px-3 py-1.5 text-xs text-zinc-100 focus:outline-none focus:border-zinc-700">
                                     @error("variants.$idx.name")
                                         <p class="text-[11px] text-rose-400 mt-1">{{ $message }}</p>
                                     @enderror
                                 </div>
-                                <div>
+                                <div class="sm:col-span-2">
                                     <label class="block text-[11px] font-medium text-zinc-300 mb-1">SKU / Kode <span class="text-rose-400">*</span></label>
                                     <input type="text" name="variants[{{ $idx }}][sku]" value="{{ $v['sku'] ?? '' }}" placeholder="ML-86" required class="w-full bg-zinc-950 border border-zinc-800 rounded-md px-3 py-1.5 text-xs text-zinc-100 font-mono focus:outline-none focus:border-zinc-700">
                                     @error("variants.$idx.sku")
                                         <p class="text-[11px] text-rose-400 mt-1">{{ $message }}</p>
                                     @enderror
                                 </div>
-                                <div>
+                                <div class="sm:col-span-2">
                                     <label class="block text-[11px] font-medium text-zinc-300 mb-1">Harga Jual (Rp) <span class="text-rose-400">*</span></label>
                                     <input type="number" name="variants[{{ $idx }}][price]" value="{{ $v['price'] ?? '' }}" placeholder="20000" required class="w-full bg-zinc-950 border border-zinc-800 rounded-md px-3 py-1.5 text-xs text-zinc-100 font-mono tabular-nums focus:outline-none focus:border-zinc-700">
                                     @error("variants.$idx.price")
                                         <p class="text-[11px] text-rose-400 mt-1">{{ $message }}</p>
                                     @enderror
                                 </div>
-                                <div>
+                                <div class="sm:col-span-2">
                                     <label class="block text-[11px] font-medium text-zinc-300 mb-1">Tipe Stok <span class="text-rose-400">*</span></label>
-                                    <select name="variants[{{ $idx }}][stock_type]" class="w-full bg-zinc-950 border border-zinc-800 rounded-md px-3 py-1.5 text-xs text-zinc-100 focus:outline-none focus:border-zinc-700">
+                                    <select name="variants[{{ $idx }}][stock_type]" onchange="toggleVariantStockInput(this)" class="w-full bg-zinc-950 border border-zinc-800 rounded-md px-3 py-1.5 text-xs text-zinc-100 focus:outline-none focus:border-zinc-700">
                                         <option value="unlimited" {{ ($v['stock_type'] ?? '') === 'unlimited' ? 'selected' : '' }}>Unlimited (Game)</option>
                                         <option value="manual" {{ ($v['stock_type'] ?? '') === 'manual' ? 'selected' : '' }}>Terbatas (Akun/Manual)</option>
                                     </select>
+                                </div>
+                                <div class="sm:col-span-2">
+                                    <label class="block text-[11px] font-medium text-zinc-300 mb-1">Jumlah Stok</label>
+                                    <input type="number" name="variants[{{ $idx }}][stock]" value="{{ $v['stock'] ?? 0 }}" min="0" placeholder="0" class="variant-stock-input w-full bg-zinc-950 border border-zinc-800 rounded-md px-3 py-1.5 text-xs text-zinc-100 font-mono tabular-nums focus:outline-none focus:border-zinc-700 transition-opacity" style="opacity: {{ ($v['stock_type'] ?? '') === 'manual' ? '1' : '0.4' }}">
                                 </div>
                             </div>
                         </div>
                     @endforeach
                 @else
                     <div class="variant-row p-4 rounded-lg bg-zinc-900/80 border border-zinc-800 relative">
-                        <div class="grid grid-cols-1 sm:grid-cols-5 gap-3">
-                            <div class="sm:col-span-2">
+                        <div class="grid grid-cols-1 sm:grid-cols-12 gap-3">
+                            <div class="sm:col-span-4">
                                 <label class="block text-[11px] font-medium text-zinc-300 mb-1">Nama Variasi / Nominal <span class="text-rose-400">*</span></label>
                                 <input type="text" name="variants[0][name]" placeholder="Contoh: 86 Diamonds / 1 Bulan" required class="w-full bg-zinc-950 border border-zinc-800 rounded-md px-3 py-1.5 text-xs text-zinc-100 focus:outline-none focus:border-zinc-700">
                             </div>
-                            <div>
+                            <div class="sm:col-span-2">
                                 <label class="block text-[11px] font-medium text-zinc-300 mb-1">SKU / Kode <span class="text-rose-400">*</span></label>
                                 <input type="text" name="variants[0][sku]" placeholder="ML-86" required class="w-full bg-zinc-950 border border-zinc-800 rounded-md px-3 py-1.5 text-xs text-zinc-100 font-mono focus:outline-none focus:border-zinc-700">
                             </div>
-                            <div>
+                            <div class="sm:col-span-2">
                                 <label class="block text-[11px] font-medium text-zinc-300 mb-1">Harga Jual (Rp) <span class="text-rose-400">*</span></label>
                                 <input type="number" name="variants[0][price]" placeholder="20000" required class="w-full bg-zinc-950 border border-zinc-800 rounded-md px-3 py-1.5 text-xs text-zinc-100 font-mono tabular-nums focus:outline-none focus:border-zinc-700">
                             </div>
-                            <div>
+                            <div class="sm:col-span-2">
                                 <label class="block text-[11px] font-medium text-zinc-300 mb-1">Tipe Stok <span class="text-rose-400">*</span></label>
-                                <select name="variants[0][stock_type]" class="w-full bg-zinc-950 border border-zinc-800 rounded-md px-3 py-1.5 text-xs text-zinc-100 focus:outline-none focus:border-zinc-700">
+                                <select name="variants[0][stock_type]" onchange="toggleVariantStockInput(this)" class="w-full bg-zinc-950 border border-zinc-800 rounded-md px-3 py-1.5 text-xs text-zinc-100 focus:outline-none focus:border-zinc-700">
                                     <option value="unlimited" selected>Unlimited (Game)</option>
                                     <option value="manual">Terbatas (Akun/Manual)</option>
                                 </select>
+                            </div>
+                            <div class="sm:col-span-2">
+                                <label class="block text-[11px] font-medium text-zinc-300 mb-1">Jumlah Stok</label>
+                                <input type="number" name="variants[0][stock]" value="0" min="0" placeholder="0" class="variant-stock-input w-full bg-zinc-950 border border-zinc-800 rounded-md px-3 py-1.5 text-xs text-zinc-100 font-mono tabular-nums focus:outline-none focus:border-zinc-700 transition-opacity" style="opacity: 0.4">
                             </div>
                         </div>
                     </div>
@@ -298,32 +306,63 @@
     const MAX_FILE_SIZE_MB = 10;
     const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
 
-    function addVariantRow(name = '', sku = '', price = '', stockType = 'unlimited', stock = '') {
+    function toggleVariantStockInput(selectEl) {
+        const row = selectEl.closest('.variant-row');
+        if (!row) return;
+        const stockInput = row.querySelector('.variant-stock-input') || row.querySelector('input[name*="[stock]"]');
+        if (!stockInput) return;
+        if (selectEl.value === 'unlimited') {
+            stockInput.style.opacity = '0.35';
+            stockInput.value = '0';
+        } else {
+            stockInput.style.opacity = '1';
+            if (stockInput.value === '0' || stockInput.value === '') {
+                stockInput.value = '10';
+            }
+            stockInput.focus();
+            stockInput.select();
+        }
+    }
+
+    function addVariantRow(name = '', sku = '', price = '', stockType = '', stock = '') {
         const container = document.getElementById('variants-container');
+        const typeSelect = document.getElementById('product_type');
+        const currentType = typeSelect ? typeSelect.value : 'game';
+
+        if (!stockType) {
+            stockType = (currentType === 'game_account' || currentType === 'account') ? 'manual' : 'unlimited';
+        }
+
+        const isLimited = stockType === 'manual';
+        const displayStock = stock !== '' ? stock : (isLimited ? '10' : '0');
         const html = `
             <div class="variant-row p-4 rounded-lg bg-zinc-900/80 border border-zinc-800 relative mt-3">
                 <button type="button" onclick="this.closest('.variant-row').remove()" class="absolute -top-2.5 -right-2.5 w-6 h-6 rounded-full bg-zinc-800 hover:bg-rose-900/80 border border-zinc-700 text-zinc-400 hover:text-rose-300 flex items-center justify-center text-xs transition-colors" title="Hapus baris">
                     ✕
                 </button>
-                <div class="grid grid-cols-1 sm:grid-cols-5 gap-3">
-                    <div class="sm:col-span-2">
+                <div class="grid grid-cols-1 sm:grid-cols-12 gap-3">
+                    <div class="sm:col-span-4">
                         <label class="block text-[11px] font-medium text-zinc-300 mb-1">Nama Variasi / Nominal <span class="text-rose-400">*</span></label>
                         <input type="text" name="variants[${variantIndex}][name]" value="${name}" placeholder="Contoh: 172 Diamonds" required class="w-full bg-zinc-950 border border-zinc-800 rounded-md px-3 py-1.5 text-xs text-zinc-100 focus:outline-none focus:border-zinc-700">
                     </div>
-                    <div>
+                    <div class="sm:col-span-2">
                         <label class="block text-[11px] font-medium text-zinc-300 mb-1">SKU / Kode <span class="text-rose-400">*</span></label>
                         <input type="text" name="variants[${variantIndex}][sku]" value="${sku}" placeholder="ML-172" required class="w-full bg-zinc-950 border border-zinc-800 rounded-md px-3 py-1.5 text-xs text-zinc-100 font-mono focus:outline-none focus:border-zinc-700">
                     </div>
-                    <div>
+                    <div class="sm:col-span-2">
                         <label class="block text-[11px] font-medium text-zinc-300 mb-1">Harga Jual (Rp) <span class="text-rose-400">*</span></label>
                         <input type="number" name="variants[${variantIndex}][price]" value="${price}" placeholder="40000" required class="w-full bg-zinc-950 border border-zinc-800 rounded-md px-3 py-1.5 text-xs text-zinc-100 font-mono tabular-nums focus:outline-none focus:border-zinc-700">
                     </div>
-                    <div>
+                    <div class="sm:col-span-2">
                         <label class="block text-[11px] font-medium text-zinc-300 mb-1">Tipe Stok <span class="text-rose-400">*</span></label>
-                        <select name="variants[${variantIndex}][stock_type]" class="w-full bg-zinc-950 border border-zinc-800 rounded-md px-3 py-1.5 text-xs text-zinc-100 focus:outline-none focus:border-zinc-700">
+                        <select name="variants[${variantIndex}][stock_type]" onchange="toggleVariantStockInput(this)" class="w-full bg-zinc-950 border border-zinc-800 rounded-md px-3 py-1.5 text-xs text-zinc-100 focus:outline-none focus:border-zinc-700">
                             <option value="unlimited" ${stockType === 'unlimited' ? 'selected' : ''}>Unlimited (Game)</option>
                             <option value="manual" ${stockType === 'manual' ? 'selected' : ''}>Terbatas (Akun/Manual)</option>
                         </select>
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label class="block text-[11px] font-medium text-zinc-300 mb-1">Jumlah Stok</label>
+                        <input type="number" name="variants[${variantIndex}][stock]" value="${displayStock}" min="0" placeholder="0" class="variant-stock-input w-full bg-zinc-950 border border-zinc-800 rounded-md px-3 py-1.5 text-xs text-zinc-100 font-mono tabular-nums focus:outline-none focus:border-zinc-700 transition-opacity" style="opacity: ${isLimited ? '1' : '0.35'}">
                     </div>
                 </div>
             </div>
@@ -338,29 +377,29 @@
         
         container.innerHTML = `
             <div class="variant-row p-4 rounded-lg bg-zinc-900/80 border border-zinc-800 relative">
-                <div class="grid grid-cols-1 sm:grid-cols-5 gap-3">
-                    <div class="sm:col-span-2">
+                <div class="grid grid-cols-1 sm:grid-cols-12 gap-3">
+                    <div class="sm:col-span-4">
                         <label class="block text-[11px] font-medium text-zinc-300 mb-1">Nama Variasi / Opsi Pembayaran <span class="text-rose-400">*</span></label>
                         <input type="text" name="variants[0][name]" value="DP (Uang Muka 50%)" required class="w-full bg-zinc-950 border border-zinc-800 rounded-md px-3 py-1.5 text-xs text-zinc-100">
                     </div>
-                    <div>
+                    <div class="sm:col-span-2">
                         <label class="block text-[11px] font-medium text-zinc-300 mb-1">SKU / Kode <span class="text-rose-400">*</span></label>
                         <input type="text" name="variants[0][sku]" value="PDH-DP-${now}" required class="w-full bg-zinc-950 border border-zinc-800 rounded-md px-3 py-1.5 text-xs text-zinc-100 font-mono">
                     </div>
-                    <div>
+                    <div class="sm:col-span-2">
                         <label class="block text-[11px] font-medium text-zinc-300 mb-1">Nominal DP (Rp) <span class="text-rose-400">*</span></label>
                         <input type="number" name="variants[0][price]" value="75000" required class="w-full bg-zinc-950 border border-zinc-800 rounded-md px-3 py-1.5 text-xs text-zinc-100 font-mono tabular-nums">
                     </div>
-                    <div>
+                    <div class="sm:col-span-2">
                         <label class="block text-[11px] font-medium text-zinc-300 mb-1">Tipe Stok <span class="text-rose-400">*</span></label>
-                        <select name="variants[0][stock_type]" class="w-full bg-zinc-950 border border-zinc-800 rounded-md px-3 py-1.5 text-xs text-zinc-100">
+                        <select name="variants[0][stock_type]" onchange="toggleVariantStockInput(this)" class="w-full bg-zinc-950 border border-zinc-800 rounded-md px-3 py-1.5 text-xs text-zinc-100">
                             <option value="manual" selected>Terbatas (Manual)</option>
                             <option value="unlimited">Unlimited</option>
                         </select>
                     </div>
-                    <div>
+                    <div class="sm:col-span-2">
                         <label class="block text-[11px] font-medium text-zinc-300 mb-1">Slot Preorder</label>
-                        <input type="number" name="variants[0][stock]" min="0" value="100" class="w-full bg-zinc-950 border border-zinc-800 rounded-md px-3 py-1.5 text-xs text-zinc-100 font-mono tabular-nums">
+                        <input type="number" name="variants[0][stock]" min="0" value="100" class="variant-stock-input w-full bg-zinc-950 border border-zinc-800 rounded-md px-3 py-1.5 text-xs text-zinc-100 font-mono tabular-nums" style="opacity: 1">
                     </div>
                 </div>
             </div>
@@ -385,29 +424,29 @@
         const container = document.getElementById('variants-container');
         container.innerHTML = `
             <div class="variant-row p-4 rounded-lg bg-zinc-900/80 border border-zinc-800 relative">
-                <div class="grid grid-cols-1 sm:grid-cols-5 gap-3">
-                    <div class="sm:col-span-2">
+                <div class="grid grid-cols-1 sm:grid-cols-12 gap-3">
+                    <div class="sm:col-span-4">
                         <label class="block text-[11px] font-medium text-zinc-300 mb-1">Nama Variasi / Nominal <span class="text-rose-400">*</span></label>
                         <input type="text" name="variants[0][name]" value="1 Hari - 1 Profil (Sharing)" required class="w-full bg-zinc-950 border border-zinc-800 rounded-md px-3 py-1.5 text-xs text-zinc-100">
                     </div>
-                    <div>
+                    <div class="sm:col-span-2">
                         <label class="block text-[11px] font-medium text-zinc-300 mb-1">SKU / Kode <span class="text-rose-400">*</span></label>
                         <input type="text" name="variants[0][sku]" value="NF-1D-${Date.now().toString().slice(-4)}" required class="w-full bg-zinc-950 border border-zinc-800 rounded-md px-3 py-1.5 text-xs text-zinc-100 font-mono">
                     </div>
-                    <div>
+                    <div class="sm:col-span-2">
                         <label class="block text-[11px] font-medium text-zinc-300 mb-1">Harga Jual (Rp) <span class="text-rose-400">*</span></label>
                         <input type="number" name="variants[0][price]" value="5000" required class="w-full bg-zinc-950 border border-zinc-800 rounded-md px-3 py-1.5 text-xs text-zinc-100 font-mono tabular-nums">
                     </div>
-                    <div>
+                    <div class="sm:col-span-2">
                         <label class="block text-[11px] font-medium text-zinc-300 mb-1">Tipe Stok <span class="text-rose-400">*</span></label>
-                        <select name="variants[0][stock_type]" class="w-full bg-zinc-950 border border-zinc-800 rounded-md px-3 py-1.5 text-xs text-zinc-100">
+                        <select name="variants[0][stock_type]" onchange="toggleVariantStockInput(this)" class="w-full bg-zinc-950 border border-zinc-800 rounded-md px-3 py-1.5 text-xs text-zinc-100">
                             <option value="manual" selected>Terbatas (Akun/Manual)</option>
                             <option value="unlimited">Unlimited (Game)</option>
                         </select>
                     </div>
-                    <div>
+                    <div class="sm:col-span-2">
                         <label class="block text-[11px] font-medium text-zinc-300 mb-1">Jumlah Stok Awal</label>
-                        <input type="number" name="variants[0][stock]" min="0" value="20" class="w-full bg-zinc-950 border border-zinc-800 rounded-md px-3 py-1.5 text-xs text-zinc-100 font-mono tabular-nums">
+                        <input type="number" name="variants[0][stock]" min="0" value="20" class="variant-stock-input w-full bg-zinc-950 border border-zinc-800 rounded-md px-3 py-1.5 text-xs text-zinc-100 font-mono tabular-nums" style="opacity: 1">
                     </div>
                 </div>
             </div>
@@ -426,6 +465,38 @@
         }
     }
 
+    function syncCategoryType(selectEl) {
+        const cat = selectEl || document.getElementById('category_select');
+        const typeSelect = document.getElementById('product_type');
+        if (!cat || !typeSelect) return;
+
+        const selectedOpt = cat.options[cat.selectedIndex];
+        if (!selectedOpt || !selectedOpt.value) return;
+
+        let detectedType = selectedOpt.getAttribute('data-type');
+        const text = (selectedOpt.text || selectedOpt.innerText || '').toLowerCase();
+
+        // Fallback detection if data-type is empty or null
+        if (!detectedType || detectedType === 'null' || detectedType === '') {
+            if (text.includes('jual') || text.includes('beli') || text.includes('game account')) {
+                detectedType = 'game_account';
+            } else if (text.includes('streaming') || text.includes('netflix') || text.includes('premium')) {
+                detectedType = 'account';
+            } else if (text.includes('joki') || text.includes('rank') || text.includes('winrate')) {
+                detectedType = 'joki';
+            } else if (text.includes('pdh') || text.includes('preorder') || text.includes('baju')) {
+                detectedType = 'preorder';
+            } else {
+                detectedType = 'game';
+            }
+        }
+
+        if (detectedType) {
+            typeSelect.value = detectedType;
+            handleProductTypeChange(detectedType);
+        }
+    }
+
     function handleProductTypeChange(type) {
         const pdhBox = document.getElementById('pdh-notice-box');
         const gameIdFields = document.getElementById('game-id-fields');
@@ -440,13 +511,47 @@
         } else {
             if (pdhBox) pdhBox.classList.add('hidden');
             if (gameIdFields) gameIdFields.classList.remove('opacity-40');
+
             if (type === 'game') {
                 if (reqUser) reqUser.checked = true;
+            } else if (type === 'game_account' || type === 'account') {
+                if (reqUser) reqUser.checked = false;
+                if (reqZone) reqZone.checked = false;
+
+                document.querySelectorAll('#variants-container .variant-row').forEach(row => {
+                    const stockTypeSelect = row.querySelector('select[name*="[stock_type]"]');
+                    if (stockTypeSelect && stockTypeSelect.value === 'unlimited') {
+                        stockTypeSelect.value = 'manual';
+                        toggleVariantStockInput(stockTypeSelect);
+                    }
+                });
+            } else if (type === 'joki') {
+                if (reqUser) reqUser.checked = true;
+                if (reqZone) reqZone.checked = true;
             }
         }
     }
 
     document.addEventListener('DOMContentLoaded', function () {
+        const variantsContainer = document.getElementById('variants-container');
+        if (variantsContainer) {
+            variantsContainer.addEventListener('change', function(e) {
+                if (e.target && e.target.matches('select[name*="[stock_type]"]')) {
+                    toggleVariantStockInput(e.target);
+                }
+            });
+            variantsContainer.addEventListener('focusin', function(e) {
+                if (e.target && e.target.matches('.variant-stock-input')) {
+                    const row = e.target.closest('.variant-row');
+                    const selectEl = row ? row.querySelector('select[name*="[stock_type]"]') : null;
+                    if (selectEl && selectEl.value === 'unlimited') {
+                        selectEl.value = 'manual';
+                        toggleVariantStockInput(selectEl);
+                    }
+                }
+            });
+        }
+
         const addBtn = document.getElementById('add-variant-btn');
         if (addBtn) {
             addBtn.addEventListener('click', () => addVariantRow());
@@ -455,20 +560,18 @@
         const catSelect = document.getElementById('category_select');
         const typeSelect = document.getElementById('product_type');
 
-        if (catSelect && typeSelect) {
-            catSelect.addEventListener('change', function() {
-                const selectedOpt = this.options[this.selectedIndex];
-                const detectedType = selectedOpt.getAttribute('data-type');
-                if (detectedType) {
-                    typeSelect.value = detectedType;
-                    handleProductTypeChange(detectedType);
-                }
-            });
+        if (catSelect) {
+            catSelect.addEventListener('change', () => syncCategoryType(catSelect));
+            if (catSelect.value) {
+                syncCategoryType(catSelect);
+            }
         }
 
         if (typeSelect) {
             typeSelect.addEventListener('change', (e) => handleProductTypeChange(e.target.value));
-            handleProductTypeChange(typeSelect.value);
+            if (!catSelect || !catSelect.value) {
+                handleProductTypeChange(typeSelect.value);
+            }
         }
 
         // Thumbnail Preview & Size Check
