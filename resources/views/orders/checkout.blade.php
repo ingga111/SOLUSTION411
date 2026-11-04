@@ -52,6 +52,8 @@
                             Jual beli akun bergaransi anti hackback dengan kredensial langsung dan aman!
                         @elseif($product->isJoki())
                             Layanan joki rank profesional, cepat, rapi dan terpercaya 24 jam nonstop!
+                        @elseif($product->isPulsa())
+                            Isi ulang pulsa &amp; token listrik PLN instan 24 jam. Cukup masukkan nomor HP atau No. Meter PLN!
                         @else
                             Layanan top up resmi 24 jam nonstop. Cukup masukkan User ID tanpa perlu login akun game!
                         @endif
@@ -233,19 +235,23 @@
                                     Data Akun Joki
                                 @elseif($product->isGameAccount())
                                     Informasi Kontak Pembeli Akun
+                                @elseif($product->isPulsa())
+                                    Nomor Handphone / No. Meter PLN
                                 @else
                                     Data Akun Game
                                 @endif
                             </h3>
-                            <p class="text-xs text-zinc-500">Pastikan data akun yang Anda masukkan sudah benar.</p>
+                            <p class="text-xs text-zinc-500">
+                                @if($product->isPulsa())
+                                    Pastikan nomor handphone atau ID Pelanggan PLN sudah sesuai dan aktif.
+                                @else
+                                    Pastikan data akun yang Anda masukkan sudah benar.
+                                @endif
+                            </p>
                         </div>
                     </div>
 
                     @if($product->requires_user_id)
-                        <button type="button" onclick="document.getElementById('modal-id-guide').classList.remove('hidden')" class="px-2.5 py-1 rounded-md bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700 text-xs font-mono transition-all flex items-center gap-1">
-                            <span>ℹ️</span>
-                            <span>Petunjuk ID</span>
-                        </button>
                     @endif
                 </div>
 

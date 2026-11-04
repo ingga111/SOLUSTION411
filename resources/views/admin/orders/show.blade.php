@@ -182,6 +182,15 @@
                         . ($order->notes ? "• Catatan: {$order->notes}\n" : "")
                         . "• Status Tagihan: " . ($order->isPaid() ? "LUNAS ✓" : "Menunggu Verifikasi Pembayaran") . "\n\n"
                         . "Spesifikasi baju sudah kami catat ke antrean produksi konveksi. Kami akan mengabari jadwal pengambilan melalui WhatsApp ini ya kak. Terima kasih! 🙏";
+                } elseif ($order->isPulsa()) {
+                    $waMessage = "Halo kak {$order->customer_name}! ⚡\n"
+                        . "Terima kasih telah bertransaksi di solustion411.\n\n"
+                        . "Pesanan Pulsa / Token Listrik Anda sedang diproses:\n"
+                        . "• Invoice: #{$order->order_number}\n"
+                        . "• Layanan: {$productLabel}\n"
+                        . "• No. HP / ID Pelanggan PLN: {$order->target_user_id}\n\n"
+                        . "Status: Sukses Terkirim / Kode Token: \n\n"
+                        . "Terima kasih banyak telah berbelanja di tempat kami! 🙏";
                 } else {
                     $waMessage = "Halo kak {$order->customer_name}! 👋\n"
                         . "Terima kasih telah berbelanja di solustion411.\n\n"
@@ -203,7 +212,7 @@
             <div class="rounded-xl p-5 sm:p-6 bg-zinc-900/60 border border-zinc-800 space-y-3">
                 <div class="flex items-center justify-between pb-2 border-b border-zinc-800">
                     <h3 class="text-xs font-semibold text-white tracking-tight uppercase">
-                        {{ $order->isPreorder() ? 'Konfirmasi Preorder via WhatsApp' : 'Kirim Akun via WhatsApp' }}
+                        {{ $order->isPreorder() ? 'Konfirmasi Preorder via WhatsApp' : ($order->isPulsa() ? 'Kirim Pulsa/Token via WhatsApp' : 'Kirim Akun via WhatsApp') }}
                     </h3>
                     <span class="text-[10px] text-zinc-400 font-mono">
                         {{ $order->customer_phone }}
@@ -279,6 +288,11 @@
                                     <span class="text-zinc-300 text-[11px] italic">{{ $order->notes }}</span>
                                 </div>
                             @endif
+                        </div>
+                    @elseif($order->isPulsa())
+                        <div class="flex justify-between py-1 border-b border-zinc-800/60">
+                            <span class="text-zinc-400">Nomor HP / No. Meter:</span>
+                            <span class="font-mono font-medium text-emerald-400 font-bold select-all">{{ $order->target_user_id }}</span>
                         </div>
                     @elseif($order->isJoki())
                         <div class="flex justify-between py-1 border-b border-zinc-800/60">

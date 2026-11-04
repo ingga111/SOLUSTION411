@@ -90,6 +90,35 @@ class Product extends Model
     }
 
     /**
+     * Get list of gallery items with index, raw path, resolved URL, and primary status.
+     *
+     * @return array<int, array{index: int, path: string, url: string, is_primary: bool}>
+     */
+    public function getGalleryItems(): array
+    {
+        $items = [];
+        $rawGallery = is_array($this->gallery) ? array_values($this->gallery) : [];
+
+        // If gallery is empty in DB but thumbnail exists, treat thumbnail as initial gallery item
+        if (empty($rawGallery) && ! empty($this->thumbnail)) {
+            $rawGallery = [$this->thumbnail];
+        }
+
+        foreach ($rawGallery as $index => $path) {
+            if (is_string($path) && trim($path) !== '') {
+                $items[] = [
+                    'index' => $index,
+                    'path' => $path,
+                    'url' => $this->resolveImageUrl($path),
+                    'is_primary' => (! empty($this->thumbnail) && $path === $this->thumbnail),
+                ];
+            }
+        }
+
+        return $items;
+    }
+
+    /**
      * Get primary thumbnail URL.
      */
     public function getThumbnailUrl(): ?string
@@ -201,6 +230,14 @@ class Product extends Model
     public function isPreorder(): bool
     {
         return $this->type === ProductType::Preorder;
+    }
+
+    /**
+     * Check if product is Pulsa or Token Listrik.
+     */
+    public function isPulsa(): bool
+    {
+        return $this->type === ProductType::Pulsa;
     }
 
     /**

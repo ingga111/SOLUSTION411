@@ -35,6 +35,7 @@ class CategoryController extends Controller
             ['value' => 'account', 'label' => '🍿 Akun Premium / Streaming'],
             ['value' => 'game_account', 'label' => '👑 Jual Beli Akun Game'],
             ['value' => 'joki', 'label' => '⚔️ Jasa Joki Rank'],
+            ['value' => 'pulsa', 'label' => '⚡ Pulsa & Token Listrik PLN'],
             ['value' => 'preorder', 'label' => '👕 Preorder PDH & Uniform'],
         ];
 

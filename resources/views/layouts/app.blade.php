@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $title ?? 'solustion411 - Top Up Game & Akun Digital Cepat & Presisi' }}</title>
     <meta name="description" content="Platform top up game instan, akun digital, dan joki dengan sistem presisi otomatis 24 jam nonstop proses 1-3 detik.">
     <link rel="preconnect" href="https://fonts.googleapis.com">

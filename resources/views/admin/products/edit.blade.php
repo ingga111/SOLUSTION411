@@ -100,9 +100,19 @@
 
                     <!-- Images & Gallery -->
                     <div>
-                        <label class="block text-xs font-medium text-zinc-300 mb-1.5">Foto Sampul Utama</label>
+                        <div class="flex items-center justify-between mb-1.5">
+                            <label class="block text-xs font-medium text-zinc-300">Foto Sampul Utama</label>
+                            @if($product->getThumbnailUrl())
+                                <button type="button"
+                                    id="btn-delete-cover"
+                                    onclick="deleteCoverPhoto({{ $product->id }})"
+                                    class="text-[10px] text-rose-400 hover:text-rose-300 transition-colors cursor-pointer">
+                                    Hapus Sampul
+                                </button>
+                            @endif
+                        </div>
                         @if($product->getThumbnailUrl())
-                            <div class="mb-2 w-32 aspect-video rounded-lg overflow-hidden border border-zinc-800 bg-zinc-950">
+                            <div id="cover-thumbnail-preview" class="mb-2 w-32 aspect-video rounded-lg overflow-hidden border border-zinc-800 bg-zinc-950 relative group">
                                 <img src="{{ $product->getThumbnailUrl() }}" alt="Current thumbnail" class="w-full h-full object-cover">
                             </div>
                         @endif
@@ -117,18 +127,50 @@
                     </div>
 
                     <div>
-                        <label class="block text-xs font-medium text-zinc-300 mb-1.5">Tambah Foto Galeri</label>
-                        @if(!empty($product->getGalleryUrls()))
-                            <div class="flex items-center gap-1.5 mb-2 overflow-x-auto pb-1">
-                                @foreach($product->getGalleryUrls() as $gUrl)
-                                    <div class="w-14 aspect-video rounded border border-zinc-800 overflow-hidden flex-shrink-0 bg-zinc-950">
-                                        <img src="{{ $gUrl }}" class="w-full h-full object-cover">
-                                    </div>
-                                @endforeach
-                            </div>
-                        @endif
-                        <input type="file" name="gallery[]" multiple accept="image/*" class="w-full text-xs text-zinc-400 file:mr-2 file:py-1 file:px-2.5 file:rounded-md file:border-0 file:text-xs file:font-medium file:bg-zinc-800 file:text-zinc-200 hover:file:bg-zinc-700 cursor-pointer bg-zinc-900 border border-zinc-800 rounded-lg py-1 px-2">
-                        <span class="text-[10px] text-zinc-500 mt-1 block">Detail foto produk tambahan (Maksimal 10MB per foto).</span>
+                        <div class="flex items-center justify-between mb-1.5">
+                            <label class="block text-xs font-medium text-zinc-300">Foto Galeri Produk</label>
+                            @php
+                                $galleryItems = $product->getGalleryItems();
+                            @endphp
+                            <span id="gallery-count-badge" class="text-[11px] text-zinc-500 font-mono {{ count($galleryItems) === 0 ? 'hidden' : '' }}">
+                                {{ count($galleryItems) }} Foto
+                            </span>
+                        </div>
+
+                        <!-- Gallery items with 1-click delete -->
+                        <div id="gallery-items-container" class="flex flex-wrap items-center gap-2 mb-2">
+                            @forelse($galleryItems as $item)
+                                <div id="gallery-item-{{ $item['index'] }}" class="relative group w-20 aspect-video rounded-lg border border-zinc-800 overflow-hidden bg-zinc-950 transition-all hover:border-zinc-700 shadow-sm">
+                                    <img src="{{ $item['url'] }}" class="w-full h-full object-cover" alt="Foto Galeri">
+                                    @if($item['is_primary'])
+                                        <span class="absolute bottom-1 left-1 bg-zinc-900/90 text-zinc-300 text-[8px] font-mono px-1 py-0.5 rounded border border-zinc-700/60 leading-none pointer-events-none">
+                                            Sampul
+                                        </span>
+                                    @endif
+                                    <!-- Delete Button -->
+                                    <button type="button"
+                                        onclick="deleteGalleryPhoto({{ $product->id }}, {{ $item['index'] }}, '{{ addslashes($item['path']) }}')"
+                                        title="Hapus foto dari galeri"
+                                        class="absolute top-1 right-1 w-5 h-5 rounded bg-black/80 hover:bg-rose-600 text-zinc-300 hover:text-white flex items-center justify-center transition-colors shadow cursor-pointer opacity-90 sm:opacity-0 group-hover:opacity-100">
+                                        <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                                        </svg>
+                                    </button>
+                                </div>
+                            @empty
+                                <div id="gallery-empty-state" class="w-full py-2 px-3 rounded-lg border border-dashed border-zinc-800 bg-zinc-900/30 text-[11px] text-zinc-500 flex items-center gap-2">
+                                    <svg class="w-4 h-4 text-zinc-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                    </svg>
+                                    <span>Belum ada foto galeri.</span>
+                                </div>
+                            @endforelse
+                        </div>
+
+                        <input type="file" name="gallery[]" id="edit_gallery_input" multiple accept="image/*" class="w-full text-xs text-zinc-400 file:mr-2 file:py-1 file:px-2.5 file:rounded-md file:border-0 file:text-xs file:font-medium file:bg-zinc-800 file:text-zinc-200 hover:file:bg-zinc-700 cursor-pointer bg-zinc-900 border border-zinc-800 rounded-lg py-1 px-2">
+                        <span class="text-[10px] text-zinc-500 mt-1 block">Tambah foto galeri baru (Maksimal 10MB per foto).</span>
+                        <div id="new_gallery_preview_wrapper" class="hidden mt-2 flex flex-wrap gap-2"></div>
                         @error('gallery')
                             <p class="text-[11px] text-rose-400 mt-1.5 font-medium">{{ $message }}</p>
                         @enderror
@@ -359,7 +401,9 @@
         let detectedType = selectedOpt.getAttribute('data-type');
         const text = (selectedOpt.text || selectedOpt.innerText || '').toLowerCase();
         if (!detectedType || detectedType === 'null' || detectedType === '') {
-            if (text.includes('jual') || text.includes('beli') || text.includes('game account')) {
+            if (text.includes('pulsa') || text.includes('listrik') || text.includes('pln') || text.includes('token') || text.includes('ewallet') || text.includes('e-wallet')) {
+                detectedType = 'pulsa';
+            } else if (text.includes('jual') || text.includes('beli') || text.includes('game account')) {
                 detectedType = 'game_account';
             } else if (text.includes('streaming') || text.includes('netflix') || text.includes('premium')) {
                 detectedType = 'account';
@@ -383,7 +427,152 @@
                 syncEditCategoryType(this);
             });
         }
+
+        const editGalleryInput = document.getElementById('edit_gallery_input');
+        if (editGalleryInput) {
+            editGalleryInput.addEventListener('change', function(e) {
+                const wrapper = document.getElementById('new_gallery_preview_wrapper');
+                if (!wrapper) return;
+                wrapper.innerHTML = '';
+                const files = Array.from(e.target.files || []);
+                if (files.length === 0) {
+                    wrapper.classList.add('hidden');
+                    return;
+                }
+                wrapper.classList.remove('hidden');
+                files.forEach(file => {
+                    if (file.type.startsWith('image/')) {
+                        const reader = new FileReader();
+                        reader.onload = function(evt) {
+                            const card = document.createElement('div');
+                            card.className = 'relative w-16 aspect-video rounded-lg border border-dashed border-emerald-500/50 overflow-hidden bg-zinc-950 flex-shrink-0';
+                            card.innerHTML = `
+                                <img src="${evt.target.result}" class="w-full h-full object-cover">
+                                <span class="absolute bottom-0 inset-x-0 bg-emerald-600/90 text-[8px] text-white text-center py-0.5 font-mono">Baru</span>
+                            `;
+                            wrapper.appendChild(card);
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+            });
+        }
     });
+
+    async function deleteGalleryPhoto(productId, index, path) {
+        if (!confirm('Hapus foto ini dari galeri produk?')) {
+            return;
+        }
+
+        const itemEl = document.getElementById(`gallery-item-${index}`);
+        if (itemEl) {
+            itemEl.style.opacity = '0.35';
+            itemEl.style.pointerEvents = 'none';
+        }
+
+        const deleteUrl = "{{ route('admin.products.gallery.destroy', [':productId', ':index']) }}"
+            .replace(':productId', productId)
+            .replace(':index', index);
+
+        try {
+            const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}';
+            const response = await fetch(deleteUrl, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': token,
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ path: path })
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.success) {
+                if (itemEl) {
+                    itemEl.style.transition = 'all 0.25s ease-out';
+                    itemEl.style.transform = 'scale(0.8)';
+                    itemEl.style.opacity = '0';
+                    setTimeout(() => {
+                        itemEl.remove();
+                        const container = document.getElementById('gallery-items-container');
+                        const remaining = container ? container.querySelectorAll('[id^="gallery-item-"]').length : 0;
+                        const badge = document.getElementById('gallery-count-badge');
+                        if (badge) {
+                            if (remaining > 0) {
+                                badge.textContent = `${remaining} Foto`;
+                                badge.classList.remove('hidden');
+                            } else {
+                                badge.classList.add('hidden');
+                            }
+                        }
+                        if (container && remaining === 0) {
+                            container.innerHTML = `
+                                <div id="gallery-empty-state" class="w-full py-2 px-3 rounded-lg border border-dashed border-zinc-800 bg-zinc-900/30 text-[11px] text-zinc-500 flex items-center gap-2">
+                                    <svg class="w-4 h-4 text-zinc-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                    </svg>
+                                    <span>Belum ada foto galeri.</span>
+                                </div>
+                            `;
+                        }
+                    }, 250);
+                }
+            } else {
+                alert(data.message || 'Gagal menghapus foto galeri.');
+                if (itemEl) {
+                    itemEl.style.opacity = '1';
+                    itemEl.style.pointerEvents = 'auto';
+                }
+            }
+        } catch (err) {
+            console.error('Delete gallery error:', err);
+            alert('Terjadi kesalahan koneksi saat menghapus foto galeri.');
+            if (itemEl) {
+                itemEl.style.opacity = '1';
+                itemEl.style.pointerEvents = 'auto';
+            }
+        }
+    }
+
+    async function deleteCoverPhoto(productId) {
+        if (!confirm('Hapus foto sampul utama produk ini?')) {
+            return;
+        }
+
+        const previewEl = document.getElementById('cover-thumbnail-preview');
+        const btnDelete = document.getElementById('btn-delete-cover');
+        if (previewEl) previewEl.style.opacity = '0.35';
+
+        const deleteUrl = "{{ route('admin.products.thumbnail.destroy', ':productId') }}"
+            .replace(':productId', productId);
+
+        try {
+            const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}';
+            const response = await fetch(deleteUrl, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': token,
+                    'Accept': 'application/json'
+                }
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.success) {
+                if (previewEl) previewEl.remove();
+                if (btnDelete) btnDelete.remove();
+            } else {
+                alert(data.message || 'Gagal menghapus foto sampul.');
+                if (previewEl) previewEl.style.opacity = '1';
+            }
+        } catch (err) {
+            console.error('Delete thumbnail error:', err);
+            alert('Terjadi kesalahan koneksi saat menghapus foto sampul.');
+            if (previewEl) previewEl.style.opacity = '1';
+        }
+    }
 </script>
 @endpush
 @endsection

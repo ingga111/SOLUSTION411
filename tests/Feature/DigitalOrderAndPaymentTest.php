@@ -4,9 +4,12 @@ namespace Tests\Feature;
 
 use App\Enums\OrderStatus;
 use App\Enums\PaymentStatus;
+use App\Enums\ProductType;
 use App\Enums\UserRole;
+use App\Models\Category;
 use App\Models\Order;
 use App\Models\PaymentMethod;
+use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Models\User;
 use App\Models\Voucher;
@@ -576,5 +579,63 @@ class DigitalOrderAndPaymentTest extends TestCase
 
         $response->assertSessionHas('success');
         $this->assertEquals(25, $variant->fresh()->stock);
+    }
+
+    public function test_customer_can_checkout_pulsa_product(): void
+    {
+        $category = Category::create([
+            'name' => 'Pulsa & Data',
+            'slug' => 'pulsa-dan-data',
+            'type' => 'pulsa',
+            'icon' => '⚡',
+            'is_active' => true,
+        ]);
+
+        $product = Product::create([
+            'category_id' => $category->id,
+            'name' => 'Pulsa Telkomsel Reguler',
+            'slug' => 'pulsa-telkomsel-reguler',
+            'type' => ProductType::Pulsa,
+            'requires_user_id' => true,
+            'user_id_label' => 'Nomor Handphone (08xx)',
+            'requires_zone_id' => false,
+            'is_active' => true,
+        ]);
+
+        $variant = ProductVariant::create([
+            'product_id' => $product->id,
+            'name' => 'Pulsa 25.000',
+            'sku' => 'TSEL-25K',
+            'price' => 26000,
+            'stock_type' => 'unlimited',
+            'is_active' => true,
+        ]);
+
+        // 1. Customer views checkout page
+        $viewResponse = $this->get(route('products.checkout', $product->slug));
+        $viewResponse->assertStatus(200);
+        $viewResponse->assertSee('Nomor Handphone (08xx)');
+        $viewResponse->assertSee('Pulsa & Token Listrik');
+
+        // 2. Customer places order
+        $response = $this->postJson(route('orders.store'), [
+            'variant_id' => $variant->id,
+            'payment_method' => 'BCA',
+            'customer_name' => 'Pembeli Pulsa',
+            'customer_email' => 'pulsa@gmail.com',
+            'customer_phone' => '081234567890',
+            'target_user_id' => '081299998888',
+        ]);
+
+        $response->assertStatus(200);
+        $response->assertJson(['success' => true]);
+
+        $orderNumber = $response->json('order_number');
+        $order = Order::where('order_number', $orderNumber)->first();
+
+        $this->assertNotNull($order);
+        $this->assertEquals(ProductType::Pulsa, $order->product_type);
+        $this->assertTrue($order->isPulsa());
+        $this->assertEquals('081299998888', $order->target_user_id);
     }
 }

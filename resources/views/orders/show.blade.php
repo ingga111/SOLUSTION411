@@ -340,6 +340,11 @@
                         </div>
                     @endif
                 </div>
+            @elseif($order->isPulsa())
+                <div>
+                    <span class="text-zinc-500 block">Nomor Tujuan / No. Meter PLN:</span>
+                    <span class="font-bold text-zinc-900 dark:text-white">{{ $order->target_user_id }}</span>
+                </div>
             @elseif($order->isGame())
                 <div>
                     <span class="text-zinc-500 block">Tujuan Akun Game:</span>

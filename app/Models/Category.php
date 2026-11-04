@@ -81,6 +81,7 @@ class Category extends Model
             'user-check' => '👑',
             'shield' => '⚔️',
             'shirt' => '👕',
+            'bolt', 'zap', 'phone' => '⚡',
             null, '' => '📁',
             default => $this->icon,
         };
@@ -97,6 +98,7 @@ class Category extends Model
             'game_account' => 'Jual Beli Akun Game',
             'joki' => 'Jasa Joki Rank',
             'preorder' => 'Preorder PDH & Uniform',
+            'pulsa' => 'Pulsa & Token Listrik',
             null, '' => 'Umum',
             default => ucfirst(str_replace('_', ' ', $this->type)),
         };

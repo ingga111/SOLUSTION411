@@ -74,6 +74,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('products/{product}/variants', [AdminProductController::class, 'storeVariant'])->name('products.variants.store');
     Route::post('variants/{variant}/add-stock', [AdminProductController::class, 'addStock'])->name('variants.add-stock');
     Route::delete('variants/{variant}', [AdminProductController::class, 'destroyVariant'])->name('variants.destroy');
+    Route::delete('products/{product}/gallery/{index}', [AdminProductController::class, 'destroyGalleryImage'])->name('products.gallery.destroy');
+    Route::delete('products/{product}/thumbnail', [AdminProductController::class, 'destroyThumbnail'])->name('products.thumbnail.destroy');
 
     // Category Management
     Route::resource('categories', AdminCategoryController::class)->except(['show', 'create', 'edit']);

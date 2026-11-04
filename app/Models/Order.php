@@ -145,6 +145,14 @@ class Order extends Model
     }
 
     /**
+     * Check if pulsa or token listrik order.
+     */
+    public function isPulsa(): bool
+    {
+        return $this->product_type === ProductType::Pulsa;
+    }
+
+    /**
      * Get clothing size (stored in target_user_id for preorder).
      */
     public function getClothingSizeAttribute(): ?string

@@ -235,6 +235,12 @@
                                             </span>
                                         @endif
                                     </div>
+                                @elseif($order->isPulsa())
+                                    <div class="mt-1 flex flex-wrap items-center gap-1">
+                                        <span class="px-1.5 py-0.2 rounded text-[10px] font-mono bg-sky-500/10 text-sky-400 border border-sky-500/20" title="Nomor HP / No. Meter PLN">
+                                            ⚡ {{ $order->target_user_id }}
+                                        </span>
+                                    </div>
                                 @elseif($order->isGame() || (!empty($order->target_user_id) && !$order->isPreorder()))
                                     <div class="mt-1 flex flex-wrap items-center gap-1">
                                         @if($order->target_user_id)

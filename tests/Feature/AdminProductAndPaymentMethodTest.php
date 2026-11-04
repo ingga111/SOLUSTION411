@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Enums\ProductType;
 use App\Enums\UserRole;
 use App\Models\Category;
 use App\Models\OrderItem;
@@ -11,6 +12,7 @@ use App\Models\ProductVariant;
 use App\Models\User;
 use Database\Seeders\DigitalProductSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class AdminProductAndPaymentMethodTest extends TestCase
@@ -239,5 +241,169 @@ class AdminProductAndPaymentMethodTest extends TestCase
             'price' => 60000,
             'deleted_at' => null,
         ]);
+    }
+
+    public function test_legacy_soft_deleted_sku_is_automatically_freed_when_creating_new_variant(): void
+    {
+        $category = Category::where('slug', 'akun-premium')->first();
+        $legacySku = 'LEGACY-SKU-999';
+
+        $product = Product::create([
+            'category_id' => $category->id,
+            'name' => 'Legacy Product',
+            'slug' => 'legacy-product-test',
+            'type' => 'account',
+            'is_active' => true,
+        ]);
+
+        $variant = ProductVariant::create([
+            'product_id' => $product->id,
+            'name' => 'Legacy Variant',
+            'sku' => $legacySku,
+            'price' => 10000,
+            'stock_type' => 'unlimited',
+            'is_active' => true,
+        ]);
+
+        // Simulate legacy soft deletion in database without renaming SKU
+        DB::table('product_variants')->where('id', $variant->id)->update(['deleted_at' => now()]);
+
+        // Creating a new product with the same legacy SKU must succeed without DB constraint error
+        $response = $this->actingAs($this->admin)->post(route('admin.products.store'), [
+            'category_id' => $category->id,
+            'name' => 'New Product Using Legacy Sku',
+            'type' => 'account',
+            'variants' => [
+                [
+                    'name' => 'New Variant',
+                    'sku' => $legacySku,
+                    'price' => 15000,
+                    'stock_type' => 'unlimited',
+                ],
+            ],
+        ]);
+
+        $response->assertRedirect(route('admin.products.index'));
+        $response->assertSessionHasNoErrors();
+
+        // The legacy soft deleted variant was automatically renamed
+        $oldVariant = DB::table('product_variants')->where('id', $variant->id)->first();
+        $this->assertStringContainsString('-deleted-', $oldVariant->sku);
+
+        // The active variant owns the original SKU
+        $this->assertDatabaseHas('product_variants', [
+            'sku' => $legacySku,
+            'deleted_at' => null,
+            'price' => 15000,
+        ]);
+    }
+
+    public function test_admin_can_create_pulsa_and_electricity_product_with_variants(): void
+    {
+        $category = Category::create([
+            'name' => 'Pulsa & Token Listrik',
+            'slug' => 'pulsa-token-listrik',
+            'type' => 'pulsa',
+            'icon' => '⚡',
+            'is_active' => true,
+        ]);
+
+        $response = $this->actingAs($this->admin)->post(route('admin.products.store'), [
+            'category_id' => $category->id,
+            'name' => 'Token Listrik PLN Prabayar',
+            'type' => 'pulsa',
+            'publisher' => 'PLN',
+            'requires_user_id' => 1,
+            'user_id_label' => 'No. Meter / ID Pelanggan PLN',
+            'requires_zone_id' => 0,
+            'variants' => [
+                [
+                    'name' => 'Token PLN 20.000',
+                    'sku' => 'PLN-20K',
+                    'price' => 21500,
+                    'cost_price' => 20000,
+                    'stock_type' => 'unlimited',
+                ],
+                [
+                    'name' => 'Token PLN 50.000',
+                    'sku' => 'PLN-50K',
+                    'price' => 51500,
+                    'cost_price' => 50000,
+                    'stock_type' => 'unlimited',
+                ],
+            ],
+        ]);
+
+        $response->assertRedirect(route('admin.products.index'));
+        $response->assertSessionHasNoErrors();
+
+        $product = Product::where('name', 'Token Listrik PLN Prabayar')->first();
+        $this->assertNotNull($product);
+        $this->assertTrue($product->isPulsa());
+        $this->assertEquals(ProductType::Pulsa, $product->type);
+        $this->assertEquals('No. Meter / ID Pelanggan PLN', $product->user_id_label);
+        $this->assertCount(2, $product->variants);
+    }
+
+    public function test_admin_can_delete_photo_from_product_gallery(): void
+    {
+        $category = Category::first();
+        $product = Product::create([
+            'category_id' => $category->id,
+            'name' => 'Akun Game Test Gallery',
+            'slug' => 'akun-game-test-gallery',
+            'type' => ProductType::GameAccount,
+            'thumbnail' => 'products/test_thumb.jpg',
+            'gallery' => [
+                'products/test_thumb.jpg',
+                'products/detail_photo1.jpg',
+                'products/detail_photo2.jpg',
+            ],
+            'is_active' => true,
+        ]);
+
+        $this->assertCount(3, $product->gallery);
+        $this->assertCount(3, $product->getGalleryItems());
+
+        // Delete photo at index 1 ('products/detail_photo1.jpg')
+        $response = $this->actingAs($this->admin)->deleteJson(
+            route('admin.products.gallery.destroy', ['product' => $product->id, 'index' => 1]),
+            ['path' => 'products/detail_photo1.jpg']
+        );
+
+        $response->assertStatus(200);
+        $response->assertJson(['success' => true]);
+
+        $product->refresh();
+        $this->assertCount(2, $product->gallery);
+        $this->assertEquals(['products/test_thumb.jpg', 'products/detail_photo2.jpg'], $product->gallery);
+    }
+
+    public function test_admin_can_delete_product_thumbnail(): void
+    {
+        $category = Category::first();
+        $product = Product::create([
+            'category_id' => $category->id,
+            'name' => 'Akun Game Test Thumb',
+            'slug' => 'akun-game-test-thumb',
+            'type' => ProductType::GameAccount,
+            'thumbnail' => 'products/cover_to_delete.jpg',
+            'gallery' => [
+                'products/cover_to_delete.jpg',
+                'products/next_photo.jpg',
+            ],
+            'is_active' => true,
+        ]);
+
+        $response = $this->actingAs($this->admin)->deleteJson(
+            route('admin.products.thumbnail.destroy', ['product' => $product->id])
+        );
+
+        $response->assertStatus(200);
+        $response->assertJson(['success' => true]);
+
+        $product->refresh();
+        // Since next_photo exists, it was promoted as thumbnail
+        $this->assertEquals('products/next_photo.jpg', $product->thumbnail);
     }
 }

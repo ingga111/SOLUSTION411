@@ -205,6 +205,9 @@
                     <button type="button" onclick="loadAccountDurationPresets()" class="px-2.5 py-1 rounded-md bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white border border-zinc-700/60 text-xs font-medium transition-colors">
                         Preset Akun Streaming
                     </button>
+                    <button type="button" onclick="loadPulsaVariantPresets()" class="px-2.5 py-1 rounded-md bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white border border-zinc-700/60 text-xs font-medium transition-colors">
+                        Preset Pulsa / PLN
+                    </button>
                     <button type="button" id="add-variant-btn" class="px-3 py-1 rounded-md bg-white text-zinc-950 hover:bg-zinc-200 font-semibold text-xs shadow-sm transition-colors inline-flex items-center gap-1">
                         <span>+ Tambah Baris</span>
                     </button>
@@ -465,6 +468,50 @@
         }
     }
 
+    function loadPulsaVariantPresets() {
+        const container = document.getElementById('variants-container');
+        const now = Date.now().toString().slice(-4);
+        container.innerHTML = `
+            <div class="variant-row p-4 rounded-lg bg-zinc-900/80 border border-zinc-800 relative">
+                <div class="grid grid-cols-1 sm:grid-cols-12 gap-3">
+                    <div class="sm:col-span-4">
+                        <label class="block text-[11px] font-medium text-zinc-300 mb-1">Nama Variasi / Nominal <span class="text-rose-400">*</span></label>
+                        <input type="text" name="variants[0][name]" value="Pulsa / Token 10.000" required class="w-full bg-zinc-950 border border-zinc-800 rounded-md px-3 py-1.5 text-xs text-zinc-100">
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label class="block text-[11px] font-medium text-zinc-300 mb-1">SKU / Kode <span class="text-rose-400">*</span></label>
+                        <input type="text" name="variants[0][sku]" value="PLS-10K-${now}" required class="w-full bg-zinc-950 border border-zinc-800 rounded-md px-3 py-1.5 text-xs text-zinc-100 font-mono">
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label class="block text-[11px] font-medium text-zinc-300 mb-1">Harga Jual (Rp) <span class="text-rose-400">*</span></label>
+                        <input type="number" name="variants[0][price]" value="11500" required class="w-full bg-zinc-950 border border-zinc-800 rounded-md px-3 py-1.5 text-xs text-zinc-100 font-mono tabular-nums">
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label class="block text-[11px] font-medium text-zinc-300 mb-1">Tipe Stok <span class="text-rose-400">*</span></label>
+                        <select name="variants[0][stock_type]" onchange="toggleVariantStockInput(this)" class="w-full bg-zinc-950 border border-zinc-800 rounded-md px-3 py-1.5 text-xs text-zinc-100">
+                            <option value="unlimited" selected>Unlimited (Otomatis)</option>
+                            <option value="manual">Terbatas (Manual)</option>
+                        </select>
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label class="block text-[11px] font-medium text-zinc-300 mb-1">Jumlah Stok</label>
+                        <input type="number" name="variants[0][stock]" min="0" value="0" class="variant-stock-input w-full bg-zinc-950 border border-zinc-800 rounded-md px-3 py-1.5 text-xs text-zinc-100 font-mono tabular-nums" style="opacity: 0.35">
+                    </div>
+                </div>
+            </div>
+        `;
+        variantIndex = 1;
+        addVariantRow('Pulsa / Token 20.000', `PLS-20K-${now}`, 21500, 'unlimited', 0);
+        addVariantRow('Pulsa / Token 50.000', `PLS-50K-${now}`, 51000, 'unlimited', 0);
+        addVariantRow('Pulsa / Token 100.000', `PLS-100K-${now}`, 100500, 'unlimited', 0);
+
+        const typeSelect = document.getElementById('product_type');
+        if (typeSelect) {
+            typeSelect.value = 'pulsa';
+            handleProductTypeChange('pulsa');
+        }
+    }
+
     function syncCategoryType(selectEl) {
         const cat = selectEl || document.getElementById('category_select');
         const typeSelect = document.getElementById('product_type');
@@ -478,7 +525,9 @@
 
         // Fallback detection if data-type is empty or null
         if (!detectedType || detectedType === 'null' || detectedType === '') {
-            if (text.includes('jual') || text.includes('beli') || text.includes('game account')) {
+            if (text.includes('pulsa') || text.includes('listrik') || text.includes('pln') || text.includes('token') || text.includes('ewallet') || text.includes('e-wallet')) {
+                detectedType = 'pulsa';
+            } else if (text.includes('jual') || text.includes('beli') || text.includes('game account')) {
                 detectedType = 'game_account';
             } else if (text.includes('streaming') || text.includes('netflix') || text.includes('premium')) {
                 detectedType = 'account';
@@ -502,18 +551,31 @@
         const gameIdFields = document.getElementById('game-id-fields');
         const reqUser = document.getElementById('requires_user_id_check');
         const reqZone = document.getElementById('requires_zone_id_check');
+        const reqUserInput = document.querySelector('input[name="user_id_label"]');
+        const reqZoneInput = document.querySelector('input[name="zone_id_label"]');
 
         if (type === 'preorder') {
             if (pdhBox) pdhBox.classList.remove('hidden');
             if (gameIdFields) gameIdFields.classList.add('opacity-40');
             if (reqUser) reqUser.checked = false;
             if (reqZone) reqZone.checked = false;
+        } else if (type === 'pulsa') {
+            if (pdhBox) pdhBox.classList.add('hidden');
+            if (gameIdFields) gameIdFields.classList.remove('opacity-40');
+            if (reqUser) reqUser.checked = true;
+            if (reqZone) reqZone.checked = false;
+            if (reqUserInput && (!reqUserInput.value || reqUserInput.value.includes('User ID'))) {
+                reqUserInput.value = 'Nomor HP / No. Meter PLN';
+            }
         } else {
             if (pdhBox) pdhBox.classList.add('hidden');
             if (gameIdFields) gameIdFields.classList.remove('opacity-40');
 
             if (type === 'game') {
                 if (reqUser) reqUser.checked = true;
+                if (reqUserInput && (!reqUserInput.value || reqUserInput.value.includes('Nomor HP'))) {
+                    reqUserInput.value = 'User ID / ID Pemain';
+                }
             } else if (type === 'game_account' || type === 'account') {
                 if (reqUser) reqUser.checked = false;
                 if (reqZone) reqZone.checked = false;

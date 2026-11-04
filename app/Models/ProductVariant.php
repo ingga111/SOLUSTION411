@@ -16,6 +16,17 @@ class ProductVariant extends Model
 
     protected static function booted(): void
     {
+        static::creating(function (ProductVariant $variant) {
+            if (! empty($variant->sku)) {
+                static::onlyTrashed()
+                    ->where('sku', $variant->sku)
+                    ->each(function (ProductVariant $trashed) {
+                        $trashed->sku = $trashed->sku.'-deleted-'.time().'-'.Str::random(4);
+                        $trashed->saveQuietly();
+                    });
+            }
+        });
+
         static::deleting(function (ProductVariant $variant) {
             if (! str_contains($variant->sku, '-deleted-')) {
                 $variant->sku = $variant->sku.'-deleted-'.time().'-'.Str::random(4);

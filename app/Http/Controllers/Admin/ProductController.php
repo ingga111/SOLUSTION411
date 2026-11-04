@@ -8,6 +8,7 @@ use App\Models\AccountStock;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\ProductVariant;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -23,6 +24,8 @@ class ProductController extends Controller
      */
     public function index(): View
     {
+        $this->cleanupLegacyTrashedSkus();
+
         $products = Product::with(['category', 'variants.accountStocks'])
             ->latest()
             ->paginate(15);
@@ -35,6 +38,8 @@ class ProductController extends Controller
      */
     public function create(): View
     {
+        $this->cleanupLegacyTrashedSkus();
+
         $categories = Category::active()->get();
         $types = ProductType::cases();
 
@@ -141,6 +146,13 @@ class ProductController extends Controller
             ]);
 
             foreach ($validated['variants'] as $vData) {
+                ProductVariant::onlyTrashed()
+                    ->where('sku', $vData['sku'])
+                    ->each(function (ProductVariant $trashed) {
+                        $trashed->sku = $trashed->sku.'-deleted-'.time().'-'.Str::random(4);
+                        $trashed->saveQuietly();
+                    });
+
                 $variant = ProductVariant::create([
                     'product_id' => $product->id,
                     'name' => $vData['name'],
@@ -282,6 +294,121 @@ class ProductController extends Controller
     }
 
     /**
+     * Delete an image from product gallery.
+     */
+    public function destroyGalleryImage(Request $request, Product $product, int|string $index): JsonResponse|RedirectResponse
+    {
+        $gallery = is_array($product->gallery) ? array_values($product->gallery) : [];
+
+        // If gallery is empty in DB, but thumbnail was used as the sole gallery item
+        if (empty($gallery) && ! empty($product->thumbnail) && ((int) $index === 0 || $request->input('path') === $product->thumbnail)) {
+            $pathToDelete = $product->thumbnail;
+            $product->thumbnail = null;
+            $product->gallery = [];
+            $product->save();
+
+            if (is_string($pathToDelete) && ! str_starts_with($pathToDelete, 'http://') && ! str_starts_with($pathToDelete, 'https://')) {
+                Storage::disk('public')->delete($pathToDelete);
+            }
+
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Foto galeri berhasil dihapus.',
+                    'remaining_count' => 0,
+                ]);
+            }
+
+            return back()->with('success', 'Foto galeri berhasil dihapus.');
+        }
+
+        // Determine target index: check path first if provided, else use index
+        $targetIndex = null;
+        if ($request->filled('path')) {
+            $found = array_search($request->input('path'), $gallery, true);
+            if ($found !== false) {
+                $targetIndex = (int) $found;
+            }
+        }
+
+        if ($targetIndex === null && isset($gallery[(int) $index])) {
+            $targetIndex = (int) $index;
+        }
+
+        if ($targetIndex === null || ! isset($gallery[$targetIndex])) {
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Foto galeri tidak ditemukan.',
+                ], 404);
+            }
+
+            return back()->with('error', 'Foto galeri tidak ditemukan.');
+        }
+
+        $pathToDelete = $gallery[$targetIndex];
+        unset($gallery[$targetIndex]);
+        $newGallery = array_values($gallery);
+
+        $product->gallery = $newGallery;
+
+        // If the deleted photo was also the current thumbnail, update thumbnail
+        if ($product->thumbnail === $pathToDelete) {
+            $product->thumbnail = $newGallery[0] ?? null;
+        }
+
+        $product->save();
+
+        // Delete physical file if stored locally and not used elsewhere
+        if (is_string($pathToDelete) && ! str_starts_with($pathToDelete, 'http://') && ! str_starts_with($pathToDelete, 'https://')) {
+            if ($product->thumbnail !== $pathToDelete && ! in_array($pathToDelete, $newGallery, true)) {
+                Storage::disk('public')->delete($pathToDelete);
+            }
+        }
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Foto galeri berhasil dihapus.',
+                'remaining_count' => count($newGallery),
+            ]);
+        }
+
+        return back()->with('success', 'Foto galeri berhasil dihapus.');
+    }
+
+    /**
+     * Delete product thumbnail.
+     */
+    public function destroyThumbnail(Request $request, Product $product): JsonResponse|RedirectResponse
+    {
+        $oldThumbnail = $product->thumbnail;
+        if (! empty($oldThumbnail)) {
+            $gallery = is_array($product->gallery) ? array_values($product->gallery) : [];
+
+            // If gallery has other images, promote the first one, otherwise null
+            $remaining = array_filter($gallery, fn ($p) => $p !== $oldThumbnail);
+            $product->thumbnail = ! empty($remaining) ? reset($remaining) : null;
+            $product->save();
+
+            if (is_string($oldThumbnail) && ! str_starts_with($oldThumbnail, 'http://') && ! str_starts_with($oldThumbnail, 'https://')) {
+                if (! in_array($oldThumbnail, $gallery, true)) {
+                    Storage::disk('public')->delete($oldThumbnail);
+                }
+            }
+        }
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Foto sampul berhasil dihapus.',
+            ]);
+        }
+
+        return back()->with('success', 'Foto sampul berhasil dihapus.');
+    }
+
+    /**
      * Parse raw string specs into key-value array.
      *
      * @return array<string, string>|null
@@ -329,6 +456,13 @@ class ProductController extends Controller
             'stock_type' => ['required', 'string', 'in:unlimited,auto_stock,manual'],
             'stock' => ['nullable', 'integer', 'min:0'],
         ]);
+
+        ProductVariant::onlyTrashed()
+            ->where('sku', $validated['sku'])
+            ->each(function (ProductVariant $trashed) {
+                $trashed->sku = $trashed->sku.'-deleted-'.time().'-'.Str::random(4);
+                $trashed->saveQuietly();
+            });
 
         ProductVariant::create([
             'product_id' => $product->id,
@@ -402,5 +536,19 @@ class ProductController extends Controller
         $variant->delete();
 
         return back()->with('success', "Variasi {$name} berhasil dihapus!");
+    }
+
+    /**
+     * Clean up any legacy soft-deleted variants whose SKUs were not renamed yet.
+     */
+    protected function cleanupLegacyTrashedSkus(): void
+    {
+        ProductVariant::onlyTrashed()
+            ->where('sku', 'NOT LIKE', '%-deleted-%')
+            ->limit(50)
+            ->each(function (ProductVariant $variant) {
+                $variant->sku = $variant->sku.'-deleted-'.time().'-'.Str::random(4);
+                $variant->saveQuietly();
+            });
     }
 }
